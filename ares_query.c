@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_query.c,v 1.1 1998-08-13 18:06:33 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_query.c,v 1.2 1998-08-17 21:45:55 ghudson Exp $";
 
 #include <sys/types.h>
 #include <arpa/nameser.h>
@@ -65,7 +65,8 @@ void ares_query(ares_channel channel, const char *name, int class,
 static void qcallback(void *arg, int status, unsigned char *abuf, int alen)
 {
   struct qquery *qquery = (struct qquery *) arg;
-  int rcode, ancount;
+  unsigned int ancount;
+  int rcode;
 
   if (status != ARES_SUCCESS)
     qquery->callback(qquery->arg, status, abuf, alen);

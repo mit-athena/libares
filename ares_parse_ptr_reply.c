@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_parse_ptr_reply.c,v 1.1 1998-08-13 18:06:32 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_parse_ptr_reply.c,v 1.2 1998-08-17 21:45:53 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -28,7 +28,8 @@ static const char rcsid[] = "$Id: ares_parse_ptr_reply.c,v 1.1 1998-08-13 18:06:
 int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
 			 int addrlen, int family, struct hostent **host)
 {
-  int qdcount, ancount, status, i, len, rr_type, rr_class, rr_len;
+  unsigned int qdcount, ancount;
+  int status, i, len, rr_type, rr_class, rr_len;
   const unsigned char *aptr;
   char *ptrname, *hostname, *rr_name, *rr_data;
   struct hostent *hostent;
