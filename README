@@ -4,6 +4,11 @@ need to perform multiple DNS queries in parallel.  The primary
 examples of such applications are servers which communicate with
 multiple clients and programs with graphical user interfaces.
 
+This library implementation is not especially portable to crufty old
+systems like SunOS.  It assumes a compile which can handle ANSI C
+syntax, a system malloc which properly handles realloc(NULL, foo) and
+free(NULL), and a reasonably up-to-date <arpa/nameser.h>.
+
 I have attempted to preserve the externally visible behavior of the
 BIND resolver in nearly all respects.  The API of the library is, of
 course, very different from the synchronous BIND API; instead of
