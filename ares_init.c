@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_init.c,v 1.2 1998-08-13 18:14:39 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_init.c,v 1.3 1998-08-17 21:49:11 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -43,6 +43,7 @@ static int init_by_resolv_conf(ares_channel channel);
 static int init_by_defaults(ares_channel channel);
 static int set_search(ares_channel channel, const char *str);
 static int set_options(ares_channel channel, const char *str);
+static const char *try_option(const char *p, const char *q, const char *opt);
 
 int ares_init(ares_channel *channelptr)
 {
@@ -117,8 +118,14 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
       server->qtail = NULL;
     }
 
+  /* Choose a somewhat random query ID.  The main point is to avoid
+   * collisions with stale queries.  An attacker trying to spoof a DNS
+   * answer also has to guess the query ID, but it's only a 16-bit
+   * field, so there's not much to be done about that.
+   */
   gettimeofday(&tv, NULL);
   channel->next_id = (tv.tv_sec ^ tv.tv_usec ^ getpid()) & 0xffff;
+
   channel->queries = NULL;
 
   *channelptr = channel;
@@ -445,7 +452,7 @@ static int set_search(ares_channel channel, const char *str)
 
 static int set_options(ares_channel channel, const char *str)
 {
-  const char *p, *q;
+  const char *p, *q, *val;
 
   /* Skip leading whitespace, for simplicity. */
   while (isspace(*str))
@@ -457,19 +464,27 @@ static int set_options(ares_channel channel, const char *str)
       q = p;
       while (*q && !isspace(*q))
 	q++;
-      if (q - p > 6 && strncmp(p, "ndots:", 6) == 0
-	  && channel->ndots == -1)
-	channel->ndots = atoi(p + 6);
-      else if (q - p > 7 && strncmp(p, "retrans:", 7) == 0
-	       && channel->timeout == -1)
-	channel->timeout = atoi(p + 7);
-      else if (q - p > 6 && strncmp(p, "retry:", 6) == 0
-	       && channel->tries == -1)
-	channel->tries = atoi(p + 6);
+      val = try_option(p, q, "ndots:");
+      if (val && channel->ndots == -1)
+	channel->ndots = atoi(val);
+      val = try_option(p, q, "retrans:");
+      if (val && channel->timeout == -1)
+	channel->timeout = atoi(val);
+      val = try_option(p, q, "retry:");
+      if (val && channel->tries == -1)
+	channel->tries = atoi(val);
       p = q;
       while (isspace(*p))
 	p++;
     }
 
   return ARES_SUCCESS;
+}
+
+static const char *try_option(const char *p, const char *q, const char *opt)
+{
+  int len;
+
+  len = strlen(opt);
+  return (q - p > len && strncmp(p, opt, len) == 0) ? p + len : NULL;
 }
