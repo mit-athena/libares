@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_query.c,v 1.3 1999-10-23 19:28:14 danw Exp $";
+static const char rcsid[] = "$Id: ares_query.c,v 1.4 2000-01-05 16:29:44 ghudson Exp $";
 
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -51,7 +51,7 @@ void ares_query(ares_channel channel, const char *name, int class,
   qquery = malloc(sizeof(struct qquery));
   if (!qquery)
     {
-      free(qbuf);
+      ares_free_string(qbuf);
       callback(arg, ARES_ENOMEM, NULL, 0);
       return;
     }
@@ -60,7 +60,7 @@ void ares_query(ares_channel channel, const char *name, int class,
 
   /* Send it off.  qcallback will be called when we get an answer. */
   ares_send(channel, qbuf, qlen, qcallback, qquery);
-  free(qbuf);
+  ares_free_string(qbuf);
 }
 
 static void qcallback(void *arg, int status, unsigned char *abuf, int alen)
