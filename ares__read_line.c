@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares__read_line.c,v 1.1 1998-08-13 18:06:26 ghudson Exp $";
+static const char rcsid[] = "$Id: ares__read_line.c,v 1.2 1998-11-02 19:13:43 ghudson Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,13 +21,13 @@ static const char rcsid[] = "$Id: ares__read_line.c,v 1.1 1998-08-13 18:06:26 gh
 #include "ares.h"
 #include "ares_private.h"
 
-/* This is an internal function.  Its contract is to read a line from a
- * file into a dynamically allocated buffer, zeroing the trailing newline
- * if there is one.  The calling routine may call al__read_line multiple
- * times with the same buf and bufsize pointers; *buf will be reallocated
- * and *bufsize adjusted as appropriate.  The initial value of *buf
- * should be NULL.  After the calling routine is done reading lines, it
- * should free *buf.
+/* This is an internal function.  Its contract is to read a line from
+ * a file into a dynamically allocated buffer, zeroing the trailing
+ * newline if there is one.  The calling routine may call
+ * ares__read_line multiple times with the same buf and bufsize
+ * pointers; *buf will be reallocated and *bufsize adjusted as
+ * appropriate.  The initial value of *buf should be NULL.  After the
+ * calling routine is done reading lines, it should free *buf.
  */
 int ares__read_line(FILE *fp, char **buf, int *bufsize)
 {
