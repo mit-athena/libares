@@ -1,4 +1,4 @@
-/* Copyright 1998 by the Massachusetts Institute of Technology.
+/* Copyright 1998, 2002 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_expand_name.c,v 1.3 2000-02-17 18:43:07 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_expand_name.c,v 1.4 2002-08-26 06:48:53 ghudson Exp $";
 
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -71,10 +71,8 @@ int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
       if ((*p & INDIR_MASK) == INDIR_MASK)
 	{
 	  if (!indir)
-	    {
-	      *enclen = p + 2 - encoded;
-	      indir = 1;
-	    }
+	    *enclen = p + 2 - encoded;
+	  indir = 1;
 	  p = abuf + ((*p & ~INDIR_MASK) << 8 | *(p + 1));
 	}
       else
@@ -109,7 +107,7 @@ static int name_length(const unsigned char *encoded, const unsigned char *abuf,
 {
   int n = 0, offset, indir = 0;
 
-  /* Allow the caller to pass us abuf + alen and have us check for it. */
+  /* An encoded domain name must contain at least one byte. */
   if (encoded == abuf + alen)
     return -1;
 
@@ -118,7 +116,7 @@ static int name_length(const unsigned char *encoded, const unsigned char *abuf,
       if ((*encoded & INDIR_MASK) == INDIR_MASK)
 	{
 	  /* Check the offset and go there. */
-	  if (encoded + 1 >= abuf + alen)
+	  if (abuf + alen - encoded < 2)
 	    return -1;
 	  offset = (*encoded & ~INDIR_MASK) << 8 | *(encoded + 1);
 	  if (offset >= alen)
@@ -134,7 +132,8 @@ static int name_length(const unsigned char *encoded, const unsigned char *abuf,
       else
 	{
 	  offset = *encoded;
-	  if (encoded + offset + 1 >= abuf + alen)
+	  /* There must be at least one byte for the next label. */
+	  if (abuf + alen - encoded < offset + 2)
 	    return -1;
 	  encoded++;
 	  while (offset--)
