@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.6 1998-09-22 01:46:11 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.6.2.1 1999-10-15 04:58:57 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -199,7 +199,7 @@ static int fake_hostent(const char *name, ares_host_callback callback,
   hostent.h_addr_list = addrs;
   callback(arg, ARES_SUCCESS, &hostent);
 
-  free(hostent.h_name);
+  free((char *) hostent.h_name);
   return 1;
 }
 

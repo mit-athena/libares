@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_free_hostent.c,v 1.2 1998-09-22 01:46:38 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_free_hostent.c,v 1.2.2.1 1999-10-15 04:58:57 ghudson Exp $";
 
 #include <stdlib.h>
 #include <netdb.h>
@@ -23,7 +23,7 @@ void ares_free_hostent(struct hostent *host)
 {
   char **p;
 
-  free(host->h_name);
+  free((char *) host->h_name);
   for (p = host->h_aliases; *p; p++)
     free(*p);
   free(host->h_aliases);
