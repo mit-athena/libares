@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_process.c,v 1.2 1998-08-17 21:50:06 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_process.c,v 1.3 1998-08-22 15:28:33 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -229,7 +229,7 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
 {
   struct server_state *server;
   int i, count;
-  unsigned char buf[PACKETSZ];
+  unsigned char buf[PACKETSZ + 1];
 
   for (i = 0; i < channel->nservers; i++)
     {
@@ -291,7 +291,7 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
    * don't accept the packet, and switch the query to TCP if we hadn't
    * done so already.
    */
-  if (tc && !tcp && !(channel->flags & ARES_FLAG_IGNTC))
+  if ((tc || alen > PACKETSZ) && !tcp && !(channel->flags & ARES_FLAG_IGNTC))
     {
       if (!query->using_tcp)
 	{
@@ -300,6 +300,12 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
 	}
       return;
     }
+
+  /* Limit alen to PACKETSZ if we aren't using TCP (only relevant if we
+   * are ignoring truncation.
+   */
+  if (alen > PACKETSZ && !tcp)
+    alen = PACKETSZ;
 
   /* If we aren't passing through all error packets, discard packets
    * with SERVFAIL, NOTIMP, or REFUSED response codes.
