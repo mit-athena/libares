@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ahost.c,v 1.1 1998-08-13 18:07:05 ghudson Exp $";
+static const char rcsid[] = "$Id: ahost.c,v 1.2 1998-09-22 01:46:25 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 static void callback(void *arg, int status, struct hostent *host)
 {
   struct in_addr addr;
-  char *mem;
+  char *mem, **p;
 
   if (status != ARES_SUCCESS)
     {
@@ -96,8 +96,11 @@ static void callback(void *arg, int status, struct hostent *host)
       return;
     }
 
-  memcpy(&addr, host->h_addr, sizeof(struct in_addr));
-  printf("%-32s\t%s\n", host->h_name, inet_ntoa(addr));
+  for (p = host->h_addr_list; *p; p++)
+    {
+      memcpy(&addr, *p, sizeof(struct in_addr));
+      printf("%-32s\t%s\n", host->h_name, inet_ntoa(addr));
+    }
 }
 
 static void usage(void)
