@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.6 1998-09-22 01:46:11 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.7 1999-10-23 19:28:13 danw Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -164,7 +164,7 @@ static int fake_hostent(const char *name, ares_host_callback callback,
   /* It only looks like an IP address if it's all numbers and dots. */
   for (p = name; *p; p++)
     {
-      if (!isdigit(*p) && *p != '.')
+      if (!isdigit((unsigned char)*p) && *p != '.')
 	return 0;
     }
 

@@ -13,10 +13,11 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_parse_ptr_reply.c,v 1.2 1998-08-17 21:45:53 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_parse_ptr_reply.c,v 1.3 1999-10-23 19:28:14 danw Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <arpa/nameser.h>
 #include <stdlib.h>
 #include <string.h>

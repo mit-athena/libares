@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: adig.c,v 1.5 1998-11-02 19:37:47 ghudson Exp $";
+static const char rcsid[] = "$Id: adig.c,v 1.6 1999-10-23 19:28:12 danw Exp $";
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
 
 	case 'T':
 	  /* Set the TCP port number. */
-	  if (!isdigit(*optarg))
+	  if (!isdigit((unsigned char)*optarg))
 	    usage();
 	  options.tcp_port = strtol(optarg, NULL, 0);
 	  optmask |= ARES_OPT_TCP_PORT;
@@ -210,7 +210,7 @@ int main(int argc, char **argv)
 
 	case 'U':
 	  /* Set the UDP port number. */
-	  if (!isdigit(*optarg))
+	  if (!isdigit((unsigned char)*optarg))
 	    usage();
 	  options.udp_port = strtol(optarg, NULL, 0);
 	  optmask |= ARES_OPT_UDP_PORT;

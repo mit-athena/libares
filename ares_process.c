@@ -13,11 +13,12 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_process.c,v 1.3 1998-08-22 15:28:33 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_process.c,v 1.4 1999-10-23 19:28:14 danw Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
+#include <netinet/in.h>
 #include <arpa/nameser.h>
 #include <string.h>
 #include <stdlib.h>

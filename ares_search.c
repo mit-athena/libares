@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_search.c,v 1.1 1998-08-13 18:06:34 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_search.c,v 1.2 1999-10-23 19:28:14 danw Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -226,15 +226,16 @@ static int single_domain(ares_channel channel, const char *name, char **s)
 	      while ((status = ares__read_line(fp, &line, &linesize))
 		     == ARES_SUCCESS)
 		{
-		  if (strncasecmp(line, name, len) != 0 || !isspace(line[len]))
+		  if (strncasecmp(line, name, len) != 0 ||
+		      !isspace((unsigned char)line[len]))
 		    continue;
 		  p = line + len;
-		  while (isspace(*p))
+		  while (isspace((unsigned char)*p))
 		    p++;
 		  if (*p)
 		    {
 		      q = p + 1;
-		      while (*q && !isspace(*q))
+		      while (*q && !isspace((unsigned char)*q))
 			q++;
 		      *s = malloc(q - p + 1);
 		      if (*s)

@@ -13,9 +13,10 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_query.c,v 1.2 1998-08-17 21:45:55 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_query.c,v 1.3 1999-10-23 19:28:14 danw Exp $";
 
 #include <sys/types.h>
+#include <netinet/in.h>
 #include <arpa/nameser.h>
 #include <stdlib.h>
 #include "ares.h"

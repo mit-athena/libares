@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ahost.c,v 1.2 1998-09-22 01:46:25 ghudson Exp $";
+static const char rcsid[] = "$Id: ahost.c,v 1.3 1999-10-23 19:28:13 danw Exp $";
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -37,7 +37,7 @@ static void usage(void);
 int main(int argc, char **argv)
 {
   ares_channel channel;
-  int status, nfds, count;
+  int status, nfds;
   fd_set read_fds, write_fds;
   struct timeval *tvp, tv;
   char *errmem;
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
       if (nfds == 0)
 	break;
       tvp = ares_timeout(channel, NULL, &tv);
-      count = select(nfds, &read_fds, &write_fds, NULL, tvp);
+      select(nfds, &read_fds, &write_fds, NULL, tvp);
       ares_process(channel, &read_fds, &write_fds);
     }
 

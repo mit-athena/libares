@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares__get_hostent.c,v 1.1 1998-08-13 18:06:26 ghudson Exp $";
+static const char rcsid[] = "$Id: ares__get_hostent.c,v 1.2 1999-10-23 19:28:13 danw Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -45,7 +45,7 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
 
       /* Get the address part. */
       p = line;
-      while (*p && !isspace(*p))
+      while (*p && !isspace((unsigned char)*p))
 	p++;
       if (!*p)
 	continue;
@@ -56,12 +56,12 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
 
       /* Get the canonical hostname. */
       p++;
-      while (isspace(*p))
+      while (isspace((unsigned char)*p))
 	p++;
       if (!*p)
 	continue;
       q = p;
-      while (*q && !isspace(*q))
+      while (*q && !isspace((unsigned char)*q))
 	q++;
       end_at_hostname = (*q == 0);
       *q = 0;
@@ -72,13 +72,13 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
 	{
 	  /* Count the aliases. */
 	  p = q + 1;
-	  while (isspace(*p))
+	  while (isspace((unsigned char)*p))
 	    p++;
 	  while (*p)
 	    {
-	      while (*p && !isspace(*p))
+	      while (*p && !isspace((unsigned char)*p))
 		p++;
-	      while (isspace(*p))
+	      while (isspace((unsigned char)*p))
 		p++;
 	      naliases++;
 	    }
@@ -108,12 +108,12 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
       if (!end_at_hostname)
 	{
 	  p = canonical + strlen(canonical) + 1;
-	  while (isspace(*p))
+	  while (isspace((unsigned char)*p))
 	    p++;
 	  while (*p)
 	    {
 	      q = p;
-	      while (*q && !isspace(*q))
+	      while (*q && !isspace((unsigned char)*q))
 		q++;
 	      hostent->h_aliases[naliases] = malloc(q - p + 1);
 	      if (hostent->h_aliases[naliases] == NULL)
@@ -121,7 +121,7 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
 	      memcpy(hostent->h_aliases[naliases], p, q - p);
 	      hostent->h_aliases[naliases][q - p] = 0;
 	      p = q;
-	      while (isspace(*p))
+	      while (isspace((unsigned char)*p))
 		p++;
 	      naliases++;
 	    }
