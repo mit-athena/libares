@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.2 1998-08-28 21:20:18 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.3 1998-09-03 02:34:47 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -52,8 +52,8 @@ void ares_gethostbyname(ares_channel channel, const char *name, int family,
 {
   struct host_query *hquery;
 
-  /* Right now we only know how to look up IPV4 and IPV6 addresses. */
-  if (family != AF_INET && family != AF_INET6)
+  /* Right now we only know how to look up Internet addresses. */
+  if (family != AF_INET)
     {
       callback(arg, ARES_ENOTIMP, NULL);
       return;
