@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_parse_message.c,v 1.1 2002-09-08 23:53:52 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_parse_message.c,v 1.2 2002-09-10 16:03:28 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -337,7 +337,7 @@ static int uncompress_rr_data(const unsigned char *aptr,
   q = rr->data;
   for (f = format; *f; f++)
     {
-      if (isdigit(*f))
+      if (isdigit((unsigned char) *f))
 	{
 	  field_len = *f - '0';
 	  memcpy(q, p, field_len);
@@ -379,7 +379,7 @@ static int uncompressed_length(const unsigned char *aptr, int rr_len,
 
   for (f = format; *f; f++)
     {
-      if (isdigit(*f))
+      if (isdigit((unsigned char) *f))
 	{
 	  field_len = *f - '0';
 	  if (aptr + rr_len - p < field_len)
