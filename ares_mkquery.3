@@ -1,4 +1,4 @@
-.\" $Id: ares_mkquery.3,v 1.3 2000-05-07 02:48:24 ghudson Exp $
+.\" $Id: ares_mkquery.3,v 1.4 2000-05-07 02:50:45 ghudson Exp $
 .\"
 .\" Copyright 1998, 2000 by the Massachusetts Institute of Technology.
 .\"
@@ -24,7 +24,8 @@ ares_mkquery \- Compose a single-question DNS query buffer
 .B
 int ares_mkquery(const char *\fIname\fP, int \fIclass\fP, int \fItype\fP,
 .B
-	unsigned short \fIid\fP, char **\fIbuf\fP, int *\fIbuflen\fP)
+	unsigned short \fIid\fP, int \fIrd\fP, char **\fIbuf\fP,
+	int *\fIbuflen\fP)
 .fi
 .SH DESCRIPTION
 The
@@ -42,9 +43,11 @@ give the class and type of the query using the values defined in
 .BR <arpa/nameser.h> .
 The parameter
 .I id
-gives a 16-bit identifier for the query.  The query will be placed in
-an allocated buffer, a pointer to which will be stored in the variable
-pointed to by
+gives a 16-bit identifier for the query.  The parameter
+.I rd
+should be nonzero if recursion is desired, zero if not.  The query
+will be placed in an allocated buffer, a pointer to which will be
+stored in the variable pointed to by
 .IR buf ,
 and the length of which will be stored in the variable pointed to by
 .IR buflen .
