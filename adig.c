@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: adig.c,v 1.8 2000-09-21 19:15:46 ghudson Exp $";
+static const char rcsid[] = "$Id: adig.c,v 1.9 2001-05-18 20:59:51 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -91,6 +91,7 @@ static const struct nv types[] = {
   { "GPOS",	T_GPOS },
   { "AAAA",	T_AAAA },
   { "LOC",	T_LOC },
+  { "SRV",	T_SRV },
   { "AXFR",	T_AXFR },
   { "MAILB",	T_MAILB },
   { "MAILA",	T_MAILA },
@@ -547,6 +548,25 @@ static const unsigned char *display_rr(const unsigned char *aptr,
     case T_WKS:
       /* Not implemented yet */
       break;
+
+    case T_SRV:
+      /* The RR data is three two-byte numbers representing the
+       * priority, weight, and port, followed by a domain name.
+       */
+      
+      printf("\t%d", DNS__16BIT(aptr));
+      printf(" %d", DNS__16BIT(aptr + 2));
+      printf(" %d", DNS__16BIT(aptr + 4));
+      
+      status = ares_expand_name(aptr + 6, abuf, alen, &name, &len);
+      if (status != ARES_SUCCESS)
+        return NULL;
+      printf("\t%s.", name);
+      free(name);
+      break;
+      
+    default:
+      printf("\t[Unknown RR; cannot parse]");
     }
   printf("\n");
 
