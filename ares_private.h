@@ -1,4 +1,4 @@
-/* $Id: ares_private.h,v 1.1 1998-08-13 18:07:56 ghudson Exp $ */
+/* $Id: ares_private.h,v 1.2 1998-08-17 21:49:36 ghudson Exp $ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
@@ -62,7 +62,7 @@ struct server_state {
 
 struct query {
   /* Query ID from qbuf, for faster lookup, and current timeout */
-  int qid;
+  unsigned short qid;
   time_t timeout;
 
   /* Query buf with length at beginning, for TCP transmission */
