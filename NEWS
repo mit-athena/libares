@@ -1,3 +1,9 @@
+Major changes in release 1.1.1:
+* ares should now compile as C++ code (no longer uses reserved word
+  "class").
+* Added SRV support to adig test program.
+* Fixed a few error handling bugs in query processing.
+
 Major changes in release 1.1.0:
 * Added ares_free_string() function so that memory can be freed in the
   same layer as it is allocated, a desirable feature in some
