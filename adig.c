@@ -1,4 +1,4 @@
-/* Copyright 1998 by the Massachusetts Institute of Technology.
+/* Copyright 1998, 2002 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: adig.c,v 1.9 2001-05-18 20:59:51 ghudson Exp $";
+static const char rcsid[] = "$Id: adig.c,v 1.10 2002-09-08 23:53:48 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -51,75 +51,89 @@ static const struct nv flags[] = {
   { "stayopen",		ARES_FLAG_STAYOPEN },
   { "noaliases",	ARES_FLAG_NOALIASES }
 };
-static const int nflags = sizeof(flags) / sizeof(flags[0]);
 
 static const struct nv classes[] = {
-  { "IN",	C_IN },
-  { "CHAOS",	C_CHAOS },
-  { "HS",	C_HS },
-  { "ANY",	C_ANY }
+  { "IN",		C_IN },
+  { "CHAOS",		C_CHAOS },
+  { "HS",		C_HS },
+  { "ANY",		C_ANY }
 };
-static const int nclasses = sizeof(classes) / sizeof(classes[0]);
 
 static const struct nv types[] = {
-  { "A",	T_A },
-  { "NS",	T_NS },
-  { "MD",	T_MD },
-  { "MF",	T_MF },
-  { "CNAME",	T_CNAME },
-  { "SOA",	T_SOA },
-  { "MB",	T_MB },
-  { "MG",	T_MG },
-  { "MR",	T_MR },
-  { "NULL",	T_NULL },
-  { "WKS",	T_WKS },
-  { "PTR",	T_PTR },
-  { "HINFO",	T_HINFO },
-  { "MINFO",	T_MINFO },
-  { "MX",	T_MX },
-  { "TXT",	T_TXT },
-  { "RP",	T_RP },
-  { "AFSDB",	T_AFSDB },
-  { "X25",	T_X25 },
-  { "ISDN",	T_ISDN },
-  { "RT",	T_RT },
-  { "NSAP",	T_NSAP },
-  { "NSAP_PTR",	T_NSAP_PTR },
-  { "SIG",	T_SIG },
-  { "KEY",	T_KEY },
-  { "PX",	T_PX },
-  { "GPOS",	T_GPOS },
-  { "AAAA",	T_AAAA },
-  { "LOC",	T_LOC },
-  { "SRV",	T_SRV },
-  { "AXFR",	T_AXFR },
-  { "MAILB",	T_MAILB },
-  { "MAILA",	T_MAILA },
-  { "ANY",	T_ANY }
-};
-static const int ntypes = sizeof(types) / sizeof(types[0]);
-
-static const char *opcodes[] = {
-  "QUERY", "IQUERY", "STATUS", "(reserved)", "NOTIFY",
-  "(unknown)", "(unknown)", "(unknown)", "(unknown)",
-  "UPDATEA", "UPDATED", "UPDATEDA", "UPDATEM", "UPDATEMA",
-  "ZONEINIT", "ZONEREF"
+  { "A",		T_A },
+  { "NS",		T_NS },
+  { "MD",		T_MD },
+  { "MF",		T_MF },
+  { "CNAME",		T_CNAME },
+  { "SOA",		T_SOA },
+  { "MB",		T_MB },
+  { "MG",		T_MG },
+  { "MR",		T_MR },
+  { "NULL",		T_NULL },
+  { "WKS",		T_WKS },
+  { "PTR",		T_PTR },
+  { "HINFO",		T_HINFO },
+  { "MINFO",		T_MINFO },
+  { "MX",		T_MX },
+  { "TXT",		T_TXT },
+  { "RP",		T_RP },
+  { "AFSDB",		T_AFSDB },
+  { "X25",		T_X25 },
+  { "ISDN",		T_ISDN },
+  { "RT",		T_RT },
+  { "NSAP",		T_NSAP },
+  { "NSAP_PTR",		T_NSAP_PTR },
+  { "SIG",		T_SIG },
+  { "KEY",		T_KEY },
+  { "PX",		T_PX },
+  { "GPOS",		T_GPOS },
+  { "AAAA",		T_AAAA },
+  { "LOC",		T_LOC },
+  { "SRV",		T_SRV },
+  { "NAPTR",		T_NAPTR },
+  { "AXFR",		T_AXFR },
+  { "MAILB",		T_MAILB },
+  { "MAILA",		T_MAILA },
+  { "ANY",		T_ANY }
 };
 
-static const char *rcodes[] = {
-  "NOERROR", "FORMERR", "SERVFAIL", "NXDOMAIN", "NOTIMP", "REFUSED",
-  "(unknown)", "(unknown)", "(unknown)", "(unknown)", "(unknown)",
-  "(unknown)", "(unknown)", "(unknown)", "(unknown)", "NOCHANGE"
+static const struct nv opcodes[] = {
+  { "QUERY",		ARES_DNS_OPCODE_QUERY },
+  { "IQUERY",		ARES_DNS_OPCODE_IQUERY },
+  { "STATUS",		ARES_DNS_OPCODE_STATUS },
+  { "(reserved)",	3 },
+  { "NOTIFY",		ARES_DNS_OPCODE_NOTIFY },
+  { "UPDATEA",		ARES_DNS_OPCODE_UPDATEA },
+  { "UPDATED",		ARES_DNS_OPCODE_UPDATED },
+  { "UPDATEDA",		ARES_DNS_OPCODE_UPDATEDA },
+  { "UPDATEM",		ARES_DNS_OPCODE_UPDATEM },
+  { "UPDATEMA",		ARES_DNS_OPCODE_UPDATEMA },
+  { "ZONEINIT",		ARES_DNS_OPCODE_ZONEINIT },
+  { "ZONEREF",		ARES_DNS_OPCODE_ZONEREF }
+};
+
+static const struct nv rcodes[] = {
+  { "NOERROR",		ARES_DNS_RCODE_NOERROR },
+  { "FORMERR",		ARES_DNS_RCODE_FORMERR },
+  { "SERVFAIL",		ARES_DNS_RCODE_SERVFAIL },
+  { "NXDOMAIN",		ARES_DNS_RCODE_NXDOMAIN },
+  { "NOTIMP",		ARES_DNS_RCODE_NOTIMP },
+  { "REFUSED",		ARES_DNS_RCODE_REFUSED },
+  { "NOCHANGE",		ARES_DNS_RCODE_NOCHANGE }
 };
 
 static void callback(void *arg, int status, unsigned char *abuf, int alen);
-static const unsigned char *display_question(const unsigned char *aptr,
-					     const unsigned char *abuf,
-					     int alen);
-static const unsigned char *display_rr(const unsigned char *aptr,
-				       const unsigned char *abuf, int alen);
+static void display_question(struct ares_dns_question *question);
+static void display_rr(struct ares_dns_rr *rr);
+static const char *nvtab_name(int value, const struct nv *table, int len);
+static int nvtab_value(const char *str, const struct nv *table, int len);
 static const char *type_name(int type);
 static const char *class_name(int dnsclass);
+static const char *opcode_name(int dnsclass);
+static const char *rcode_name(int dnsclass);
+static int flag_value(const char *dnsclass);
+static int class_value(const char *dnsclass);
+static int type_value(const char *type);
 static void usage(void);
 
 int main(int argc, char **argv)
@@ -142,14 +156,10 @@ int main(int argc, char **argv)
 	{
 	case 'f':
 	  /* Add a flag. */
-	  for (i = 0; i < nflags; i++)
-	    {
-	      if (strcmp(flags[i].name, optarg) == 0)
-		break;
-	    }
-	  if (i == nflags)
+	  i = flag_value(optarg);
+	  if (i == -1)
 	    usage();
-	  options.flags |= flags[i].value;
+	  options.flags |= i;
 	  break;
 
 	case 's':
@@ -175,26 +185,16 @@ int main(int argc, char **argv)
 
 	case 'c':
 	  /* Set the query class. */
-	  for (i = 0; i < nclasses; i++)
-	    {
-	      if (strcasecmp(classes[i].name, optarg) == 0)
-		break;
-	    }
-	  if (i == nclasses)
+	  dnsclass = class_value(optarg);
+	  if (dnsclass == -1)
 	    usage();
-	  dnsclass = classes[i].value;
 	  break;
 
 	case 't':
 	  /* Set the query type. */
-	  for (i = 0; i < ntypes; i++)
-	    {
-	      if (strcasecmp(types[i].name, optarg) == 0)
-		break;
-	    }
-	  if (i == ntypes)
+	  type = type_value(optarg);
+	  if (type == -1)
 	    usage();
-	  type = types[i].value;
 	  break;
 
 	case 'T':
@@ -266,9 +266,8 @@ int main(int argc, char **argv)
 static void callback(void *arg, int status, unsigned char *abuf, int alen)
 {
   char *name = (char *) arg, *errmem;
-  int id, qr, opcode, aa, tc, rd, ra, rcode, i;
-  unsigned int qdcount, ancount, nscount, arcount;
-  const unsigned char *aptr;
+  struct ares_dns_message *message;
+  int i;
 
   /* Display the query name if given. */
   if (name)
@@ -285,156 +284,65 @@ static void callback(void *arg, int status, unsigned char *abuf, int alen)
 	return;
     }
 
-  /* Won't happen, but check anyway, for safety. */
-  if (alen < HFIXEDSZ)
-    return;
-
-  /* Parse the answer header. */
-  id = DNS_HEADER_QID(abuf);
-  qr = DNS_HEADER_QR(abuf);
-  opcode = DNS_HEADER_OPCODE(abuf);
-  aa = DNS_HEADER_AA(abuf);
-  tc = DNS_HEADER_TC(abuf);
-  rd = DNS_HEADER_RD(abuf);
-  ra = DNS_HEADER_RA(abuf);
-  rcode = DNS_HEADER_RCODE(abuf);
-  qdcount = DNS_HEADER_QDCOUNT(abuf);
-  ancount = DNS_HEADER_ANCOUNT(abuf);
-  nscount = DNS_HEADER_NSCOUNT(abuf);
-  arcount = DNS_HEADER_ARCOUNT(abuf);
+  status = ares_parse_message(abuf, alen, &message);
+  if (status != ARES_SUCCESS)
+    {
+      printf("%s\n", ares_strerror(status, &errmem));
+      ares_free_errmem(errmem);
+      return;
+    }
 
   /* Display the answer header. */
-  printf("id: %d\n", id);
+  printf("id: %d\n", message->id);
   printf("flags: %s%s%s%s%s\n",
-	 qr ? "qr " : "",
-	 aa ? "aa " : "",
-	 tc ? "tc " : "",
-	 rd ? "rd " : "",
-	 ra ? "ra " : "");
-  printf("opcode: %s\n", opcodes[opcode]);
-  printf("rcode: %s\n", rcodes[rcode]);
+	 message->is_response ? "qr " : "",
+	 message->authoritative_answer ? "aa " : "",
+	 message->truncated ? "tc " : "",
+	 message->recursion_desired ? "rd " : "",
+	 message->recursion_available ? "ra " : "");
+  printf("opcode: %s\n", opcode_name(message->opcode));
+  printf("rcode: %s\n", rcode_name(message->response_code));
 
-  /* Display the questions. */
+  /* Display the questions and RR sections. */
   printf("Questions:\n");
-  aptr = abuf + HFIXEDSZ;
-  for (i = 0; i < qdcount; i++)
-    {
-      aptr = display_question(aptr, abuf, alen);
-      if (aptr == NULL)
-	return;
-    }
-
-  /* Display the answers. */
+  for (i = 0; i < message->qcount; i++)
+    display_question(&message->questions[i]);
   printf("Answers:\n");
-  for (i = 0; i < ancount; i++)
-    {
-      aptr = display_rr(aptr, abuf, alen);
-      if (aptr == NULL)
-	return;
-    }
-
-  /* Display the NS records. */
+  for (i = 0; i < message->answers.count; i++)
+    display_rr(&message->answers.records[i]);
   printf("NS records:\n");
-  for (i = 0; i < nscount; i++)
-    {
-      aptr = display_rr(aptr, abuf, alen);
-      if (aptr == NULL)
-	return;
-    }
-
-  /* Display the additional records. */
+  for (i = 0; i < message->authority.count; i++)
+    display_rr(&message->authority.records[i]);
   printf("Additional records:\n");
-  for (i = 0; i < arcount; i++)
-    {
-      aptr = display_rr(aptr, abuf, alen);
-      if (aptr == NULL)
-	return;
-    }
+  for (i = 0; i < message->additional.count; i++)
+    display_rr(&message->additional.records[i]);
+
+  ares_free_dns_message(message);
 }
 
-static const unsigned char *display_question(const unsigned char *aptr,
-					     const unsigned char *abuf,
-					     int alen)
+static void display_question(struct ares_dns_question *question)
 {
-  char *name;
-  int type, dnsclass, status, len;
-
-  /* Parse the question name. */
-  status = ares_expand_name(aptr, abuf, alen, &name, &len);
-  if (status != ARES_SUCCESS)
-    return NULL;
-  aptr += len;
-
-  /* Make sure there's enough data after the name for the fixed part
-   * of the question.
-   */
-  if (aptr + QFIXEDSZ > abuf + alen)
-    {
-      free(name);
-      return NULL;
-    }
-
-  /* Parse the question type and class. */
-  type = DNS_QUESTION_TYPE(aptr);
-  dnsclass = DNS_QUESTION_CLASS(aptr);
-  aptr += QFIXEDSZ;
-
-  /* Display the question, in a format sort of similar to how we will
-   * display RRs.
-   */
-  printf("\t%-15s.\t", name);
-  if (dnsclass != C_IN)
-    printf("\t%s", class_name(dnsclass));
-  printf("\t%s\n", type_name(type));
-  free(name);
-  return aptr;
+  printf("\t%-15s.\t", question->name);
+  if (question->dnsclass != C_IN)
+    printf("\t%s", class_name(question->dnsclass));
+  printf("\t%s\n", type_name(question->type));
 }
 
-static const unsigned char *display_rr(const unsigned char *aptr,
-				       const unsigned char *abuf, int alen)
+static void display_rr(struct ares_dns_rr *rr)
 {
   const unsigned char *p;
   char *name;
-  int type, dnsclass, ttl, dlen, status, len;
+  int status, len;
   struct in_addr addr;
 
-  /* Parse the RR name. */
-  status = ares_expand_name(aptr, abuf, alen, &name, &len);
-  if (status != ARES_SUCCESS)
-    return NULL;
-  aptr += len;
-
-  /* Make sure there is enough data after the RR name for the fixed
-   * part of the RR.
-   */
-  if (aptr + RRFIXEDSZ > abuf + alen)
-    {
-      free(name);
-      return NULL;
-    }
-
-  /* Parse the fixed part of the RR, and advance to the RR data
-   * field. */
-  type = DNS_RR_TYPE(aptr);
-  dnsclass = DNS_RR_CLASS(aptr);
-  ttl = DNS_RR_TTL(aptr);
-  dlen = DNS_RR_LEN(aptr);
-  aptr += RRFIXEDSZ;
-  if (aptr + dlen > abuf + alen)
-    {
-      free(name);
-      return NULL;
-    }
-
   /* Display the RR name, class, and type. */
-  printf("\t%-15s.\t%d", name, ttl);
-  if (dnsclass != C_IN)
-    printf("\t%s", class_name(dnsclass));
-  printf("\t%s", type_name(type));
-  free(name);
+  printf("\t%-15s.\t%d", rr->name, rr->ttl);
+  if (rr->dnsclass != C_IN)
+    printf("\t%s", class_name(rr->dnsclass));
+  printf("\t%s", type_name(rr->type));
 
   /* Display the RR data.  Don't touch aptr. */
-  switch (type)
+  switch (rr->type)
     {
     case T_CNAME:
     case T_MB:
@@ -445,76 +353,76 @@ static const unsigned char *display_rr(const unsigned char *aptr,
     case T_NS:
     case T_PTR:
       /* For these types, the RR data is just a domain name. */
-      status = ares_expand_name(aptr, abuf, alen, &name, &len);
+      status = ares_expand_name(rr->data, rr->data, rr->len, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+	return;
       printf("\t%s.", name);
-      free(name);
+      ares_free_string(name);
       break;
 
     case T_HINFO:
       /* The RR data is two length-counted character strings. */
-      p = aptr;
+      p = rr->data;
       len = *p;
-      if (p + len + 1 > aptr + dlen)
-	return NULL;
+      if (rr->data + rr->len - p < len + 1)
+	return;
       printf("\t%.*s", len, p + 1);
       p += len + 1;
       len = *p;
-      if (p + len + 1 > aptr + dlen)
-	return NULL;
+      if (rr->data + rr->len - p < len + 1)
+	return;
       printf("\t%.*s", len, p + 1);
       break;
 
     case T_MINFO:
       /* The RR data is two domain names. */
-      p = aptr;
-      status = ares_expand_name(p, abuf, alen, &name, &len);
+      p = rr->data;
+      status = ares_expand_name(p, rr->data, rr->len, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+	return;
       printf("\t%s.", name);
-      free(name);
+      ares_free_string(name);
       p += len;
-      status = ares_expand_name(p, abuf, alen, &name, &len);
+      status = ares_expand_name(p, rr->data, rr->len, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+	return;
       printf("\t%s.", name);
-      free(name);
+      ares_free_string(name);
       break;
 
     case T_MX:
       /* The RR data is two bytes giving a preference ordering, and
        * then a domain name.
        */
-      if (dlen < 2)
-	return NULL;
-      printf("\t%d", (aptr[0] << 8) | aptr[1]);
-      status = ares_expand_name(aptr + 2, abuf, alen, &name, &len);
+      if (rr->len < 2)
+	return;
+      printf("\t%d", (rr->data[0] << 8) | rr->data[1]);
+      status = ares_expand_name(rr->data + 2, rr->data, rr->len, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+	return;
       printf("\t%s.", name);
-      free(name);
+      ares_free_string(name);
       break;
 
     case T_SOA:
       /* The RR data is two domain names and then five four-byte
        * numbers giving the serial number and some timeouts.
        */
-      p = aptr;
-      status = ares_expand_name(p, abuf, alen, &name, &len);
+      p = rr->data;
+      status = ares_expand_name(p, rr->data, rr->len, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+	return;
       printf("\t%s.\n", name);
-      free(name);
+      ares_free_string(name);
       p += len;
-      status = ares_expand_name(p, abuf, alen, &name, &len);
+      status = ares_expand_name(p, rr->data, rr->len, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+	return;
       printf("\t\t\t\t\t\t%s.\n", name);
-      free(name);
+      ares_free_string(name);
       p += len;
-      if (p + 20 > aptr + dlen)
-	return NULL;
+      if (rr->data + rr->len - p < 20)
+	return;
       printf("\t\t\t\t\t\t( %d %d %d %d %d )",
 	     (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3],
 	     (p[4] << 24) | (p[5] << 16) | (p[6] << 8) | p[7],
@@ -526,12 +434,12 @@ static const unsigned char *display_rr(const unsigned char *aptr,
     case T_TXT:
       /* The RR data is one or more length-counted character
        * strings. */
-      p = aptr;
-      while (p < aptr + dlen)
+      p = rr->data;
+      while (rr->data + rr->len - p > 0)
 	{
 	  len = *p;
-	  if (p + len + 1 > aptr + dlen)
-	    return NULL;
+	  if (rr->data + rr->len - p < len + 1)
+	    return;
 	  printf("\t%.*s", len, p + 1);
 	  p += len + 1;
 	}
@@ -539,9 +447,9 @@ static const unsigned char *display_rr(const unsigned char *aptr,
 
     case T_A:
       /* The RR data is a four-byte Internet address. */
-      if (dlen != 4)
-	return NULL;
-      memcpy(&addr, aptr, sizeof(struct in_addr));
+      if (rr->len != 4)
+	return;
+      memcpy(&addr, rr->data, sizeof(struct in_addr));
       printf("\t%s", inet_ntoa(addr));
       break;
 
@@ -553,48 +461,84 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       /* The RR data is three two-byte numbers representing the
        * priority, weight, and port, followed by a domain name.
        */
-      
-      printf("\t%d", DNS__16BIT(aptr));
-      printf(" %d", DNS__16BIT(aptr + 2));
-      printf(" %d", DNS__16BIT(aptr + 4));
-      
-      status = ares_expand_name(aptr + 6, abuf, alen, &name, &len);
+
+      if (rr->len < 6)
+	return;
+      p = rr->data;
+      printf("\t%d", (p[0] << 8) | p[1]);
+      printf(" %d", (p[2] << 8) | p[3]);
+      printf(" %d", (p[4] << 8) | p[5]);
+
+      status = ares_expand_name(rr->data + 6, rr->data, rr->len, &name, &len);
       if (status != ARES_SUCCESS)
-        return NULL;
+        return;
       printf("\t%s.", name);
-      free(name);
+      ares_free_string(name);
       break;
       
     default:
       printf("\t[Unknown RR; cannot parse]");
     }
   printf("\n");
-
-  return aptr + dlen;
 }
 
-static const char *type_name(int type)
+static const char *nvtab_name(int value, const struct nv *table, int len)
 {
   int i;
 
-  for (i = 0; i < ntypes; i++)
+  for (i = 0; i < len; i++)
     {
-      if (types[i].value == type)
+      if (table[i].value == value)
 	return types[i].name;
     }
   return "(unknown)";
 }
 
-static const char *class_name(int dnsclass)
+static int nvtab_value(const char *str, const struct nv *table, int len)
 {
   int i;
 
-  for (i = 0; i < nclasses; i++)
+  for (i = 0; i < len; i++)
     {
-      if (classes[i].value == dnsclass)
-	return classes[i].name;
+      if (strcasecmp(table[i].name, str) == 0)
+	return table[i].value;
     }
-  return "(unknown)";
+  return -1;
+}
+
+static const char *type_name(int type)
+{
+  return nvtab_name(type, types, sizeof(types) / sizeof(*types));
+}
+
+static const char *class_name(int dnsclass)
+{
+  return nvtab_name(dnsclass, classes, sizeof(classes) / sizeof(*classes));
+}
+
+static const char *opcode_name(int opcode)
+{
+  return nvtab_name(opcode, opcodes, sizeof(opcodes) / sizeof(*opcodes));
+}
+
+static const char *rcode_name(int rcode)
+{
+  return nvtab_name(rcode, rcodes, sizeof(rcodes) / sizeof(*rcodes));
+}
+
+static int flag_value(const char *flag)
+{
+  return nvtab_value(flag, flags, sizeof(flags) / sizeof(*flags));
+}
+
+static int class_value(const char *dnsclass)
+{
+  return nvtab_value(dnsclass, classes, sizeof(classes) / sizeof(*classes));
+}
+
+static int type_value(const char *type)
+{
+  return nvtab_value(type, types, sizeof(types) / sizeof(*types));
 }
 
 static void usage(void)

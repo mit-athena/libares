@@ -1,6 +1,6 @@
-/* $Id: ares.h,v 1.3 2000-09-21 19:15:48 ghudson Exp $ */
+/* $Id: ares.h,v 1.4 2002-09-08 23:53:49 ghudson Exp $ */
 
-/* Copyright 1998 by the Massachusetts Institute of Technology.
+/* Copyright 1998, 2002 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -21,48 +21,68 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
-#define ARES_SUCCESS		0
+#define ARES_SUCCESS			0
 
 /* Server error codes (ARES_ENODATA indicates no relevant answer) */
-#define ARES_ENODATA		1
-#define ARES_EFORMERR		2
-#define ARES_ESERVFAIL		3
-#define ARES_ENOTFOUND		4
-#define ARES_ENOTIMP		5
-#define ARES_EREFUSED		6
+#define ARES_ENODATA			1
+#define ARES_EFORMERR			2
+#define ARES_ESERVFAIL			3
+#define ARES_ENOTFOUND			4
+#define ARES_ENOTIMP			5
+#define ARES_EREFUSED			6
 
 /* Locally generated error codes */
-#define ARES_EBADQUERY		7
-#define ARES_EBADNAME		8
-#define ARES_EBADFAMILY		9
-#define ARES_EBADRESP		10
-#define ARES_ECONNREFUSED	11
-#define ARES_ETIMEOUT		12
-#define ARES_EOF		13
-#define ARES_EFILE		14
-#define ARES_ENOMEM		15
-#define ARES_EDESTRUCTION	16
+#define ARES_EBADQUERY			7
+#define ARES_EBADNAME			8
+#define ARES_EBADFAMILY			9
+#define ARES_EBADRESP			10
+#define ARES_ECONNREFUSED		11
+#define ARES_ETIMEOUT			12
+#define ARES_EOF			13
+#define ARES_EFILE			14
+#define ARES_ENOMEM			15
+#define ARES_EDESTRUCTION		16
 
 /* Flag values */
-#define ARES_FLAG_USEVC		(1 << 0)
-#define ARES_FLAG_PRIMARY	(1 << 1)
-#define ARES_FLAG_IGNTC		(1 << 2)
-#define ARES_FLAG_NORECURSE	(1 << 3)
-#define ARES_FLAG_STAYOPEN	(1 << 4)
-#define ARES_FLAG_NOSEARCH	(1 << 5)
-#define ARES_FLAG_NOALIASES	(1 << 6)
-#define ARES_FLAG_NOCHECKRESP	(1 << 7)
+#define ARES_FLAG_USEVC			(1 << 0)
+#define ARES_FLAG_PRIMARY		(1 << 1)
+#define ARES_FLAG_IGNTC			(1 << 2)
+#define ARES_FLAG_NORECURSE		(1 << 3)
+#define ARES_FLAG_STAYOPEN		(1 << 4)
+#define ARES_FLAG_NOSEARCH		(1 << 5)
+#define ARES_FLAG_NOALIASES		(1 << 6)
+#define ARES_FLAG_NOCHECKRESP		(1 << 7)
 
 /* Option mask values */
-#define ARES_OPT_FLAGS		(1 << 0)
-#define ARES_OPT_TIMEOUT	(1 << 1)
-#define ARES_OPT_TRIES		(1 << 2)
-#define ARES_OPT_NDOTS		(1 << 3)
-#define ARES_OPT_UDP_PORT	(1 << 4)
-#define ARES_OPT_TCP_PORT	(1 << 5)
-#define ARES_OPT_SERVERS	(1 << 6)
-#define ARES_OPT_DOMAINS	(1 << 7)
-#define ARES_OPT_LOOKUPS	(1 << 8)
+#define ARES_OPT_FLAGS			(1 << 0)
+#define ARES_OPT_TIMEOUT		(1 << 1)
+#define ARES_OPT_TRIES			(1 << 2)
+#define ARES_OPT_NDOTS			(1 << 3)
+#define ARES_OPT_UDP_PORT		(1 << 4)
+#define ARES_OPT_TCP_PORT		(1 << 5)
+#define ARES_OPT_SERVERS		(1 << 6)
+#define ARES_OPT_DOMAINS		(1 << 7)
+#define ARES_OPT_LOOKUPS		(1 << 8)
+
+#define ARES_DNS_OPCODE_QUERY		0
+#define ARES_DNS_OPCODE_IQUERY		1
+#define ARES_DNS_OPCODE_STATUS		2
+#define ARES_DNS_OPCODE_NOTIFY		4
+#define ARES_DNS_OPCODE_UPDATEA		9
+#define ARES_DNS_OPCODE_UPDATED		10
+#define ARES_DNS_OPCODE_UPDATEDA	11
+#define ARES_DNS_OPCODE_UPDATEM		12
+#define ARES_DNS_OPCODE_UPDATEMA	13
+#define ARES_DNS_OPCODE_ZONEINIT	14
+#define ARES_DNS_OPCODE_ZONEREF		15
+
+#define ARES_DNS_RCODE_NOERROR		0
+#define ARES_DNS_RCODE_FORMERR		1
+#define ARES_DNS_RCODE_SERVFAIL		2
+#define ARES_DNS_RCODE_NXDOMAIN		3
+#define ARES_DNS_RCODE_NOTIMP		4
+#define ARES_DNS_RCODE_REFUSED		5
+#define ARES_DNS_RCODE_NOCHANGE		15
 
 struct ares_options {
   int flags;
@@ -76,6 +96,43 @@ struct ares_options {
   char **domains;
   int ndomains;
   char *lookups;
+};
+
+struct ares_dns_question {
+  char *name;
+  int type;
+  int dnsclass;
+};
+
+struct ares_dns_rr {
+  char *name;
+  int type;
+  int dnsclass;
+  int ttl;
+  int len;
+  unsigned char *data;
+};
+
+struct ares_dns_section {
+  int count;
+  struct ares_dns_rr *records;
+};
+
+struct ares_dns_message {
+  int id;
+  int is_response;
+  int opcode;
+  int authoritative_answer;
+  int truncated;
+  int recursion_desired;
+  int recursion_available;
+  int zero;
+  int response_code;
+  int qcount;
+  struct ares_dns_question *questions;
+  struct ares_dns_section answers;
+  struct ares_dns_section authority;
+  struct ares_dns_section additional;
 };
 
 struct hostent;
@@ -112,11 +169,15 @@ int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
 		 int rd, unsigned char **buf, int *buflen);
 int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
 		     int alen, char **s, int *enclen);
+int ares_parse_message(const unsigned char *abuf, int alen,
+		       struct ares_dns_message **message);
 int ares_parse_a_reply(const unsigned char *abuf, int alen,
 		       struct hostent **host);
 int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
 			 int addrlen, int family, struct hostent **host);
+
 void ares_free_string(char *str);
+void ares_free_dns_message(struct ares_dns_message *message);
 void ares_free_hostent(struct hostent *host);
 const char *ares_strerror(int code, char **memptr);
 void ares_free_errmem(char *mem);

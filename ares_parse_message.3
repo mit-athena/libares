@@ -1,0 +1,162 @@
+.\" $Id: ares_parse_message.3,v 1.1 2002-09-08 23:53:51 ghudson Exp $
+.\"
+.\" Copyright 2002 by the Massachusetts Institute of Technology.
+.\"
+.\" Permission to use, copy, modify, and distribute this
+.\" software and its documentation for any purpose and without
+.\" fee is hereby granted, provided that the above copyright
+.\" notice appear in all copies and that both that copyright
+.\" notice and this permission notice appear in supporting
+.\" documentation, and that the name of M.I.T. not be used in
+.\" advertising or publicity pertaining to distribution of the
+.\" software without specific, written prior permission.
+.\" M.I.T. makes no representations about the suitability of
+.\" this software for any purpose.  It is provided "as is"
+.\" without express or implied warranty.
+.\"
+.TH ARES_PARSE_MESSAGE 3 "26 August 2002"
+.SH NAME
+ares_parse_message \- Parse a DNS message into a struct ares_dns_message
+.SH SYNOPSIS
+.nf
+.B #include <ares.h>
+.PP
+.B
+int ares_parse_message(const unsigned char *\fIabuf\fB, int \fIalen\fB,
+.B 	struct ares_dns_message **\fImessage\fB);
+.fi
+.SH DESCRIPTION
+The
+.B ares_parse_message
+function parses a DNS message into a
+.BR "struct ares_dns_message" .
+Resource record data is returned as an unparsed sequence of bytes;
+however, if a record of well-known type contains compressed domain
+names, the domain names will be uncompressed.  The parameters
+.I abuf
+and
+.I alen
+give the contents of the message.  The result is stored in allocated
+memory and a pointer to it stored into the variable pointed to by
+.IR message .
+It is the caller's responsibility to free the resulting host structure
+using
+.BR ares_free_dns_message (3)
+when it is no longer needed.
+.SH RETURN VALUES
+.B ares_parse_message can return any of the following values:
+.TP 15
+.B ARES_SUCCESS
+The response was successfully parsed.
+.TP 15
+.B ARES_EBADRESP
+The response was malformatted.
+.TP 15
+.B ARES_ENOMEM
+Memory was exhausted.
+.PP
+The
+.B ares_dns_message
+structure contains the following fields:
+.TP 15
+.B int \fIid\fP;
+The identifier of this message.
+.TP 15
+.B int \fIis_response\fP;
+1 if this message is a response, 0 if it is a request.
+.TP 15
+.B int \fIopcode\fP;
+The opcode of this message.
+.B ares.h
+defines values of the form
+.B ARES_DNS_OPCODE_QUERY
+corresponding to the possible opcode values.
+.TP 15
+.B int \fIauthoritative_answer\fP;
+1 if this message is an authoritative answer, 0 if not.  Only
+meaningful for responses.
+.TP 15
+.B int \fItruncated\fP;
+1 if this message was truncated (because it did not fit in a UDP
+packet), 0 if not.  Only meaningful for responses.
+.TP 15
+.B int \fIrecursion_desired\fP;
+1 if recursion is requested for this query, 0 if not.  Only meaningful
+for requests.
+.TP 15
+.B int \fIrecursion_available\fP;
+1 if recursion is allowed by this server, 0 if not.  Only meaningful
+for responses.
+.TP 15
+.B int \fIzero\fP;
+Reserved bits in the message format, generally set to 0.
+.TP 15
+.B int \fIresponse_code\fP;
+The status of this response.
+.TP 15
+.B int \fIqcount\fP;
+The number of questions in this message.
+.TP 15
+.B struct ares_dns_question *\fIquestions\fP;
+This message's queries.
+.TP 15
+.B struct ares_dns_section *\fIanswers\fP;
+This message's answers.
+.TP 15
+.B struct ares_dns_section *\fIauthority\fP;
+This message's authority records.
+.TP 15
+.B struct ares_dns_section *\fIadditional\fP;
+This message's additional records.
+.PP
+The
+.B ares_dns_question
+structure contains the following fields:
+.TP 15
+.B char *\fIname\fP;
+The name this question is asking about.
+.TP 15
+.B int \fItype\fP;
+The DNS type of the record set this question is asking about.
+.TP 15
+.B int \fIdnsclass\fP;
+The DNS class of the record set this question is asking about.
+.PP
+The
+.B ares_dns_section
+structure contains the following fields:
+.TP 15
+.B int \fIcount\fP;
+The number of resource records in this section.
+.TP 15
+.B struct ares_dns_rr *\fIrecords\fP;
+This section's resource records.
+.PP
+The
+.B ares_dns_rr
+structure contains the following fields:
+.TP 15
+.B char *\fIname\fP;
+The name of this resource record.
+.TP 15
+.B int \fItype\fP;
+The DNS type of this resource record.
+.TP 15
+.B int \fIdnsclass\fP;
+The DNS class of this resource record.
+.TP 15
+.B int \fIttl\fP;
+The time-to-live of this resource record, in seconds.
+.TP 15
+.B int \fIlen\fP;
+The length of this resource record's data.
+.TP 15
+.B unsigned char *\fIdata\fP;
+This resource record's data.
+.SH SEE ALSO
+.BR ares_expand_name (3),
+.BR ares_free_dns_message (3)
+.SH AUTHOR
+Greg Hudson, MIT Information Systems
+.br
+Copyright 2002 by the Massachusetts Institute of Technology.

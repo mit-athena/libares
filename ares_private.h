@@ -1,6 +1,6 @@
-/* $Id: ares_private.h,v 1.4 2002-04-04 14:01:58 ghudson Exp $ */
+/* $Id: ares_private.h,v 1.5 2002-09-08 23:53:53 ghudson Exp $ */
 
-/* Copyright 1998 by the Massachusetts Institute of Technology.
+/* Copyright 1998, 2002 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -126,3 +126,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now);
 void ares__close_sockets(struct server_state *server);
 int ares__get_hostent(FILE *fp, struct hostent **host);
 int ares__read_line(FILE *fp, char **buf, int *bufsize);
+void ares__free_questions(struct ares_dns_question *questions, int count);
+void ares__free_question(struct ares_dns_question *question);
+void ares__free_section(struct ares_dns_section *section);
+void ares__free_rr(struct ares_dns_rr *rr);
