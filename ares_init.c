@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_init.c,v 1.5 1998-09-18 22:09:00 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_init.c,v 1.6 1998-09-22 01:46:11 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -38,13 +38,17 @@ static int init_by_environment(ares_channel channel);
 static int init_by_resolv_conf(ares_channel channel);
 static int init_by_defaults(ares_channel channel);
 static int config_domain(ares_channel channel, char *str);
-static int config_lookup(ares_channel channel, char *str);
+static int config_lookup(ares_channel channel, const char *str);
 static int config_nameserver(struct server_state **servers, int *nservers,
 			     const char *str);
+static int config_sortlist(struct apattern **sortlist, int *nsort,
+			   const char *str);
 static int set_search(ares_channel channel, const char *str);
 static int set_options(ares_channel channel, const char *str);
 static char *try_config(char *s, char *opt);
 static const char *try_option(const char *p, const char *q, const char *opt);
+static int ip_addr(const char *s, int len, struct in_addr *addr);
+static void natural_mask(struct apattern *pat);
 
 int ares_init(ares_channel *channelptr)
 {
@@ -74,6 +78,7 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   channel->tcp_port = -1;
   channel->nservers = -1;
   channel->ndomains = -1;
+  channel->nsort = -1;
   channel->lookups = NULL;
 
   /* Initialize configuration by each of the four sources, from highest
@@ -97,6 +102,8 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
 	    free(channel->domains[i]);
 	  free(channel->domains);
 	}
+      if (channel->nsort != -1)
+	free(channel->sortlist);
       free(channel->lookups);
       free(channel);
       return status;
@@ -220,8 +227,9 @@ static int init_by_resolv_conf(ares_channel channel)
 {
   FILE *fp;
   char *line = NULL, *p;
-  int linesize, status, nservers = 0;
+  int linesize, status, nservers = 0, nsort = 0;
   struct server_state *servers = NULL;
+  struct apattern *sortlist = NULL;
 
   fp = fopen(PATH_RESOLV_CONF, "r");
   if (!fp)
@@ -236,6 +244,8 @@ static int init_by_resolv_conf(ares_channel channel)
 	status = set_search(channel, p);
       else if ((p = try_config(line, "nameserver")) && channel->nservers == -1)
 	status = config_nameserver(&servers, &nservers, p);
+      else if ((p = try_config(line, "sortlist")) && channel->nsort == -1)
+	status = config_sortlist(&sortlist, &nsort, p);
       else if ((p = try_config(line, "options")))
 	status = set_options(channel, p);
       else
@@ -250,6 +260,7 @@ static int init_by_resolv_conf(ares_channel channel)
   if (status != ARES_EOF)
     {
       free(servers);
+      free(sortlist);
       return status;
     }
 
@@ -258,6 +269,13 @@ static int init_by_resolv_conf(ares_channel channel)
     {
       channel->servers = servers;
       channel->nservers = nservers;
+    }
+
+  /* If we got any sortlist entries, fill them in. */
+  if (sortlist)
+    {
+      channel->sortlist = sortlist;
+      channel->nsort = nsort;
     }
 
   return ARES_SUCCESS;
@@ -314,6 +332,12 @@ static int init_by_defaults(ares_channel channel)
 	}
     }
 
+  if (channel->nsort == -1)
+    {
+      channel->sortlist = NULL;
+      channel->nsort = 0;
+    }
+
   if (!channel->lookups)
     {
       channel->lookups = strdup("bf");
@@ -336,9 +360,10 @@ static int config_domain(ares_channel channel, char *str)
   return set_search(channel, str);
 }
 
-static int config_lookup(ares_channel channel, char *str)
+static int config_lookup(ares_channel channel, const char *str)
 {
-  char lookups[3], *l, *p;
+  char lookups[3], *l;
+  const char *p;
 
   /* Set the lookup order.  Only the first letter of each work
    * is relevant, and it has to be "b" for DNS or "f" for the
@@ -376,6 +401,53 @@ static int config_nameserver(struct server_state **servers, int *nservers,
   newserv[*nservers].addr = addr;
   *servers = newserv;
   (*nservers)++;
+  return ARES_SUCCESS;
+}
+
+static int config_sortlist(struct apattern **sortlist, int *nsort,
+			   const char *str)
+{
+  struct apattern pat, *newsort;
+  const char *q;
+
+  /* Add sortlist entries. */
+  while (*str && *str != ';')
+    {
+      q = str;
+      while (*q && *q != '/' && *q != ';' && !isspace(*q))
+	q++;
+      if (ip_addr(str, q - str, &pat.addr) == 0)
+	{
+	  /* We have a pattern address; now determine the mask. */
+	  if (*q == '/')
+	    {
+	      str = q + 1;
+	      while (*q && *q != ';' && !isspace(*q))
+		q++;
+	      if (ip_addr(str, q - str, &pat.mask) != 0)
+		natural_mask(&pat);
+	    }
+	  else
+	    natural_mask(&pat);
+
+	  /* Add this pattern to our list. */
+	  newsort = realloc(*sortlist, (*nsort + 1) * sizeof(struct apattern));
+	  if (!newsort)
+	    return ARES_ENOMEM;
+	  newsort[*nsort] = pat;
+	  *sortlist = newsort;
+	  (*nsort)++;
+	}
+      else
+	{
+	  while (*q && *q != ';' && !isspace(*q))
+	    q++;
+	}
+      str = q;
+      while (isspace(*str))
+	str++;
+    }
+
   return ARES_SUCCESS;
 }
 
@@ -470,4 +542,40 @@ static const char *try_option(const char *p, const char *q, const char *opt)
 
   len = strlen(opt);
   return (q - p > len && strncmp(p, opt, len) == 0) ? p + len : NULL;
+}
+
+static int ip_addr(const char *s, int len, struct in_addr *addr)
+{
+  char ipbuf[16];
+
+  /* Four octets and three periods yields at most 15 characters. */
+  if (len > 15)
+    return -1;
+  memcpy(ipbuf, s, len);
+  ipbuf[len] = 0;
+
+  addr->s_addr = inet_addr(ipbuf);
+  if (addr->s_addr == INADDR_NONE && strcmp(ipbuf, "255.255.255.255") != 0)
+    return -1;
+  return 0;
+}
+
+static void natural_mask(struct apattern *pat)
+{
+  struct in_addr addr;
+
+  /* Store a host-byte-order copy of pat in a struct in_addr.  Icky,
+   * but portable.
+   */
+  addr.s_addr = ntohl(pat->addr.s_addr);
+
+  /* This is out of date in the CIDR world, but some people might
+   * still rely on it.
+   */
+  if (IN_CLASSA(addr.s_addr))
+    pat->mask.s_addr = htonl(IN_CLASSA_NET);
+  else if (IN_CLASSB(addr.s_addr))
+    pat->mask.s_addr = htonl(IN_CLASSB_NET);
+  else
+    pat->mask.s_addr = htonl(IN_CLASSC_NET);
 }

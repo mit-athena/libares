@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_destroy.c,v 1.1 1998-08-13 18:06:27 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_destroy.c,v 1.2 1998-09-22 01:46:10 ghudson Exp $";
 
 #include <stdlib.h>
 #include "ares.h"
@@ -30,6 +30,7 @@ void ares_destroy(ares_channel channel)
   for (i = 0; i < channel->ndomains; i++)
     free(channel->domains[i]);
   free(channel->domains);
+  free(channel->sortlist);
   free(channel->lookups);
   while (channel->queries)
     {

@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.5 1998-09-17 23:18:41 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.6 1998-09-22 01:46:11 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -46,6 +46,10 @@ static void end_hquery(struct host_query *hquery, int status,
 static int fake_hostent(const char *name, ares_host_callback callback,
 			void *arg);
 static int file_lookup(const char *name, struct hostent **host);
+static void sort_addresses(struct hostent *host, struct apattern *sortlist,
+			   int nsort);
+static int get_address_index(struct in_addr *addr, struct apattern *sortlist,
+			     int nsort);
 
 void ares_gethostbyname(ares_channel channel, const char *name, int family,
 			ares_host_callback callback, void *arg)
@@ -119,11 +123,14 @@ static void next_lookup(struct host_query *hquery)
 static void host_callback(void *arg, int status, unsigned char *abuf, int alen)
 {
   struct host_query *hquery = (struct host_query *) arg;
+  ares_channel channel = hquery->channel;
   struct hostent *host;
 
   if (status == ARES_SUCCESS)
     {
       status = ares_parse_a_reply(abuf, alen, &host);
+      if (host && channel->nsort)
+	sort_addresses(host, channel->sortlist, channel->nsort);
       end_hquery(hquery, status, host);
     }
   else if (status == ARES_EDESTRUCTION)
@@ -225,4 +232,47 @@ static int file_lookup(const char *name, struct hostent **host)
   if (status != ARES_SUCCESS)
     *host = NULL;
   return status;
+}
+
+static void sort_addresses(struct hostent *host, struct apattern *sortlist,
+			   int nsort)
+{
+  struct in_addr a1, a2;
+  int i1, i2, ind1, ind2;
+
+  /* This is a simple insertion sort, not optimized at all.  i1 walks
+   * through the address list, with the loop invariant that everything
+   * to the left of i1 is sorted.  In the loop body, the value at i1 is moved
+   * back through the list (via i2) until it is in sorted order.
+   */
+  for (i1 = 0; host->h_addr_list[i1]; i1++)
+    {
+      memcpy(&a1, host->h_addr_list[i1], sizeof(struct in_addr));
+      ind1 = get_address_index(&a1, sortlist, nsort);
+      for (i2 = i1 - 1; i2 >= 0; i2--)
+	{
+	  memcpy(&a2, host->h_addr_list[i2], sizeof(struct in_addr));
+	  ind2 = get_address_index(&a2, sortlist, nsort);
+	  if (ind2 <= ind1)
+	    break;
+	  memcpy(host->h_addr_list[i2 + 1], &a2, sizeof(struct in_addr));
+	}
+      memcpy(host->h_addr_list[i2 + 1], &a1, sizeof(struct in_addr));
+    }
+}
+
+/* Find the first entry in sortlist which matches addr.  Return nsort
+ * if none of them match.
+ */
+static int get_address_index(struct in_addr *addr, struct apattern *sortlist,
+			     int nsort)
+{
+  int i;
+
+  for (i = 0; i < nsort; i++)
+    {
+      if ((addr->s_addr & sortlist[i].mask.s_addr) == sortlist[i].addr.s_addr)
+	break;
+    }
+  return i;
 }

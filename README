@@ -17,7 +17,6 @@ call ares_process() when select() returns.
 Some features are missing from the current version of ares, relative
 to the BIND resolver:
 
-	* The "sortlist" resolv.conf directive is not implemented.
 	* There is no IPV6 support.
 	* There is no hostname verification.
 	* There is no logging of unexpected events.

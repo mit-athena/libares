@@ -1,4 +1,4 @@
-/* $Id: ares_private.h,v 1.2 1998-08-17 21:49:36 ghudson Exp $ */
+/* $Id: ares_private.h,v 1.3 1998-09-22 01:46:11 ghudson Exp $ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
@@ -86,6 +86,12 @@ struct query {
   struct query *next;
 };
 
+/* An IP address pattern; matches an IP address X if X & mask == addr */
+struct apattern {
+  struct in_addr addr;
+  struct in_addr mask;
+};
+
 struct ares_channeldata {
   /* Configuration data */
   int flags;
@@ -96,6 +102,8 @@ struct ares_channeldata {
   int tcp_port;
   char **domains;
   int ndomains;
+  struct apattern *sortlist;
+  int nsort;
   char *lookups;
 
   /* Server addresses and communications state */
