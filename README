@@ -5,7 +5,7 @@ examples of such applications are servers which communicate with
 multiple clients and programs with graphical user interfaces.
 
 This library implementation is not especially portable to crufty old
-systems like SunOS.  It assumes a compile which can handle ANSI C
+systems like SunOS 4.  It assumes a compile which can handle ANSI C
 syntax, a system malloc which properly handles realloc(NULL, foo) and
 free(NULL), and a reasonably up-to-date <arpa/nameser.h>.
 
