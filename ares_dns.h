@@ -1,4 +1,4 @@
-/* $Id: ares_dns.h,v 1.2 2000-02-17 18:38:16 ghudson Exp $ */
+/* $Id: ares_dns.h,v 1.3 2001-07-30 12:40:26 ghudson Exp $ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
@@ -73,9 +73,9 @@
 #define DNS_RR_LEN(r)			DNS__16BIT((r) + 8)
 
 /* Macros for constructing the fixed part of a DNS resource record */
-#define DNS_RR_SET_TYPE(r)		DNS__SET16BIT(r, v)
-#define DNS_RR_SET_CLASS(r)		DNS__SET16BIT((r) + 2, v)
-#define DNS_RR_SET_TTL(r)		DNS__SET32BIT((r) + 4, v)
-#define DNS_RR_SET_LEN(r)		DNS__SET16BIT((r) + 8, v)
+#define DNS_RR_SET_TYPE(r, v)		DNS__SET16BIT(r, v)
+#define DNS_RR_SET_CLASS(r, v)		DNS__SET16BIT((r) + 2, v)
+#define DNS_RR_SET_TTL(r, v)		DNS__SET32BIT((r) + 4, v)
+#define DNS_RR_SET_LEN(r, v)		DNS__SET16BIT((r) + 8, v)
 
 #endif /* ARES__DNS_H */
