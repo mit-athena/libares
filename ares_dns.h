@@ -1,4 +1,4 @@
-/* $Id: ares_dns.h,v 1.1 1998-08-13 18:07:56 ghudson Exp $ */
+/* $Id: ares_dns.h,v 1.2 2000-02-17 18:38:16 ghudson Exp $ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
@@ -30,13 +30,13 @@
 
 /* Macros for parsing a DNS header */
 #define DNS_HEADER_QID(h)		DNS__16BIT(h)
-#define DNS_HEADER_QR(h)		(((h)[2] >> 7) | 0x1)
+#define DNS_HEADER_QR(h)		(((h)[2] >> 7) & 0x1)
 #define DNS_HEADER_OPCODE(h)		(((h)[2] >> 3) & 0xf)
 #define DNS_HEADER_AA(h)		(((h)[2] >> 2) & 0x1)
 #define DNS_HEADER_TC(h)		(((h)[2] >> 1) & 0x1)
 #define DNS_HEADER_RD(h)		((h)[2] & 0x1)
-#define DNS_HEADER_RA(h)		(((h)[3] >> 7) | 0x1)
-#define DNS_HEADER_Z(h)			(((h)[3] >> 4) | 0x7)
+#define DNS_HEADER_RA(h)		(((h)[3] >> 7) & 0x1)
+#define DNS_HEADER_Z(h)			(((h)[3] >> 4) & 0x7)
 #define DNS_HEADER_RCODE(h)		((h)[3] & 0xf)
 #define DNS_HEADER_QDCOUNT(h)		DNS__16BIT((h) + 4)
 #define DNS_HEADER_ANCOUNT(h)		DNS__16BIT((h) + 6)
