@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.3 1998-09-03 02:34:47 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.4 1998-09-03 02:40:57 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -59,7 +59,7 @@ void ares_gethostbyname(ares_channel channel, const char *name, int family,
       return;
     }
 
-  if (fake_hostent(name, family, callback, arg))
+  if (fake_hostent(name, callback, arg))
     return;
 
   /* Allocate and fill in the host query structure. */
