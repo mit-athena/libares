@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_parse_a_reply.c,v 1.2 1998-08-17 21:45:51 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_parse_a_reply.c,v 1.3 2003-09-12 00:25:17 mwhitson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -24,55 +24,52 @@ static const char rcsid[] = "$Id: ares_parse_a_reply.c,v 1.2 1998-08-17 21:45:51
 #include <string.h>
 #include <netdb.h>
 #include "ares.h"
-#include "ares_dns.h"
-#include "ares_private.h"
 
 int ares_parse_a_reply(const unsigned char *abuf, int alen,
 		       struct hostent **host)
 {
-  unsigned int qdcount, ancount;
-  int status, i, len, rr_type, rr_class, rr_len, naddrs;
+  int status, i, len, naddrs;
   int naliases;
-  const unsigned char *aptr;
-  char *hostname, *rr_name, *rr_data, **aliases;
+  char *hostname, *rr_data, **aliases;
+  struct ares_dns_message *message;
+  struct ares_dns_rr *rr;
   struct in_addr *addrs;
   struct hostent *hostent;
 
   /* Set *host to NULL for all failure cases. */
   *host = NULL;
 
-  /* Give up if abuf doesn't have room for a header. */
-  if (alen < HFIXEDSZ)
-    return ARES_EBADRESP;
-
-  /* Fetch the question and answer count from the header. */
-  qdcount = DNS_HEADER_QDCOUNT(abuf);
-  ancount = DNS_HEADER_ANCOUNT(abuf);
-  if (qdcount != 1)
-    return ARES_EBADRESP;
-
-  /* Expand the name from the question, and skip past the question. */
-  aptr = abuf + HFIXEDSZ;
-  status = ares_expand_name(aptr, abuf, alen, &hostname, &len);
+  status = ares_parse_message(abuf, alen, &message);
   if (status != ARES_SUCCESS)
     return status;
-  if (aptr + len + QFIXEDSZ > abuf + alen)
+
+  if (message->qcount != 1)
     {
-      free(hostname);
+      ares_free_dns_message(message);
       return ARES_EBADRESP;
     }
-  aptr += len + QFIXEDSZ;
 
-  /* Allocate addresses and aliases; ancount gives an upper bound for both. */
-  addrs = malloc(ancount * sizeof(struct in_addr));
+  hostname = strdup(message->questions[0].name);
+  if (!hostname)
+    {
+      ares_free_dns_message(message);
+      return ARES_ENOMEM;
+    }
+
+  /* Allocate addresses and aliases; message->answers.count gives an
+   * upper bound for both.
+   */
+  addrs = malloc(message->answers.count * sizeof(struct in_addr));
   if (!addrs)
     {
+      ares_free_dns_message(message);
       free(hostname);
       return ARES_ENOMEM;
     }
-  aliases = malloc((ancount + 1) * sizeof(char *));
+  aliases = malloc((message->answers.count + 1) * sizeof(char *));
   if (!aliases)
     {
+      ares_free_dns_message(message);
       free(hostname);
       free(addrs);
       return ARES_ENOMEM;
@@ -81,53 +78,42 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
   naliases = 0;
 
   /* Examine each answer resource record (RR) in turn. */
-  for (i = 0; i < ancount; i++)
+  for (i = 0; i < message->answers.count; i++)
     {
-      /* Decode the RR up to the data field. */
-      status = ares_expand_name(aptr, abuf, alen, &rr_name, &len);
-      if (status != ARES_SUCCESS)
-	break;
-      aptr += len;
-      if (aptr + RRFIXEDSZ > abuf + alen)
+      rr = &message->answers.records[i];
+      if (rr->dnsclass == C_IN && rr->type == T_A
+	  && rr->len == sizeof(struct in_addr)
+	  && strcasecmp(rr->name, hostname) == 0)
 	{
-	  status = ARES_EBADRESP;
-	  break;
-	}
-      rr_type = DNS_RR_TYPE(aptr);
-      rr_class = DNS_RR_CLASS(aptr);
-      rr_len = DNS_RR_LEN(aptr);
-      aptr += RRFIXEDSZ;
-
-      if (rr_class == C_IN && rr_type == T_A
-	  && rr_len == sizeof(struct in_addr)
-	  && strcasecmp(rr_name, hostname) == 0)
-	{
-	  memcpy(&addrs[naddrs], aptr, sizeof(struct in_addr));
+	  memcpy(&addrs[naddrs], rr->data, sizeof(struct in_addr));
 	  naddrs++;
 	  status = ARES_SUCCESS;
 	}
 
-      if (rr_class == C_IN && rr_type == T_CNAME)
+      if (rr->dnsclass == C_IN && rr->type == T_CNAME)
 	{
 	  /* Record the RR name as an alias. */
-	  aliases[naliases] = rr_name;
+	  aliases[naliases] = strdup(rr->name);
+	  if (aliases[naliases] == NULL)
+	    {
+	      status = ARES_ENOMEM;
+	      break;
+	    }
 	  naliases++;
 
 	  /* Decode the RR data and replace the hostname with it. */
-	  status = ares_expand_name(aptr, abuf, alen, &rr_data, &len);
+
+	  /* ares_parse_message() resolves compression pointers in the
+	   * RR data, but the data still need to be expanded.  Since
+	   * we know there is no indirection, use the data buffer
+	   * itself as the containing buffer. 
+	   */
+	  status = ares_expand_name(rr->data, rr->data, rr->len,
+				    &rr_data, &len);
 	  if (status != ARES_SUCCESS)
 	    break;
 	  free(hostname);
 	  hostname = rr_data;
-	}
-      else
-	free(rr_name);
-
-      aptr += rr_len;
-      if (aptr > abuf + alen)
-	{
-	  status = ARES_EBADRESP;
-	  break;
 	}
     }
 
@@ -163,5 +149,6 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
   free(aliases);
   free(addrs);
   free(hostname);
+  ares_free_dns_message(message);
   return status;
 }
