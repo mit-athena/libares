@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: adig.c,v 1.6 1999-10-23 19:28:12 danw Exp $";
+static const char rcsid[] = "$Id: adig.c,v 1.7 2000-04-03 22:37:44 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -91,10 +91,6 @@ static const struct nv types[] = {
   { "GPOS",	T_GPOS },
   { "AAAA",	T_AAAA },
   { "LOC",	T_LOC },
-  { "UINFO",	T_UINFO },
-  { "UID",	T_UID },
-  { "GID",	T_GID },
-  { "UNSPEC",	T_UNSPEC },
   { "AXFR",	T_AXFR },
   { "MAILB",	T_MAILB },
   { "MAILA",	T_MAILA },
