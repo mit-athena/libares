@@ -1,4 +1,4 @@
-/* $Id: ares_private.h,v 1.3 1998-09-22 01:46:11 ghudson Exp $ */
+/* $Id: ares_private.h,v 1.4 2002-04-04 14:01:58 ghudson Exp $ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
@@ -58,6 +58,11 @@ struct server_state {
   /* TCP output queue */
   struct send_request *qhead;
   struct send_request *qtail;
+
+  /* Readable/writable flags for ares_process() */
+  int udp_readable;
+  int tcp_readable;
+  int tcp_writable;
 };
 
 struct query {

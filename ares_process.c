@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_process.c,v 1.8 2001-07-25 15:01:42 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_process.c,v 1.9 2002-04-04 14:01:58 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -30,11 +30,9 @@ static const char rcsid[] = "$Id: ares_process.c,v 1.8 2001-07-25 15:01:42 ghuds
 #include "ares_dns.h"
 #include "ares_private.h"
 
-static void write_tcp_data(ares_channel channel, fd_set *write_fds,
-			   time_t now);
-static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now);
-static void read_udp_packets(ares_channel channel, fd_set *read_fds,
-			     time_t now);
+static void write_tcp_data(ares_channel channel, time_t now);
+static void read_tcp_data(ares_channel channel, time_t now);
+static void read_udp_packets(ares_channel channel, time_t now);
 static void process_timeouts(ares_channel channel, time_t now);
 static void process_answer(ares_channel channel, unsigned char *abuf,
 			   int alen, int whichserver, int tcp, int now);
@@ -52,19 +50,36 @@ static void end_query(ares_channel channel, struct query *query, int status,
  */
 void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
 {
+  int i;
+  struct server_state *server;
   time_t now;
 
+  /* Set writable/readable flags on server states.  We can't just pass
+   * fd sets around because fds can be closed and reopened during
+   * processing.
+   */
+  for (i = 0; i < channel->nservers; i++)
+    {
+      server = &channel->servers[i];
+      server->udp_readable = (server->udp_socket != -1
+			      && FD_ISSET(server->udp_socket, read_fds));
+      server->tcp_readable = (server->tcp_socket != -1
+			      && FD_ISSET(server->tcp_socket, read_fds));
+      server->tcp_writable = (server->qhead && server->tcp_socket != -1
+			      && FD_ISSET(server->tcp_socket, write_fds));
+    }
+
   time(&now);
-  write_tcp_data(channel, write_fds, now);
-  read_tcp_data(channel, read_fds, now);
-  read_udp_packets(channel, read_fds, now);
+  write_tcp_data(channel, now);
+  read_tcp_data(channel, now);
+  read_udp_packets(channel, now);
   process_timeouts(channel, now);
 }
 
 /* If any TCP sockets select true for writing, write out queued data
  * we have for them.
  */
-static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
+static void write_tcp_data(ares_channel channel, time_t now)
 {
   struct server_state *server;
   struct send_request *sendreq;
@@ -73,10 +88,8 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
 
   for (i = 0; i < channel->nservers; i++)
     {
-      /* Make sure server has data to send and is selected in write_fds. */
       server = &channel->servers[i];
-      if (!server->qhead || server->tcp_socket == -1
-	  || !FD_ISSET(server->tcp_socket, write_fds))
+      if (!server->tcp_writable)
 	continue;
 
       /* Count the number of send queue items. */
@@ -156,16 +169,15 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
  * allocate a buffer if we finish reading the length word, and process
  * a packet if we finish reading one.
  */
-static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
+static void read_tcp_data(ares_channel channel, time_t now)
 {
   struct server_state *server;
   int i, count;
 
   for (i = 0; i < channel->nservers; i++)
     {
-      /* Make sure the server has a socket and is selected in read_fds. */
       server = &channel->servers[i];
-      if (server->tcp_socket == -1 || !FD_ISSET(server->tcp_socket, read_fds))
+      if (!server->tcp_readable)
 	continue;
 
       if (server->tcp_lenbuf_pos != 2)
@@ -225,8 +237,7 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
 }
 
 /* If any UDP sockets select true for reading, process them. */
-static void read_udp_packets(ares_channel channel, fd_set *read_fds,
-			     time_t now)
+static void read_udp_packets(ares_channel channel, time_t now)
 {
   struct server_state *server;
   int i, count;
@@ -234,9 +245,8 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
 
   for (i = 0; i < channel->nservers; i++)
     {
-      /* Make sure the server has a socket and is selected in read_fds. */
       server = &channel->servers[i];
-      if (server->udp_socket == -1 || !FD_ISSET(server->udp_socket, read_fds))
+      if (!server->udp_readable)
 	continue;
 
       count = recv(server->udp_socket, buf, sizeof(buf), 0);

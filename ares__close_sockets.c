@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares__close_sockets.c,v 1.1 1998-08-13 18:06:22 ghudson Exp $";
+static const char rcsid[] = "$Id: ares__close_sockets.c,v 1.2 2002-04-04 14:01:52 ghudson Exp $";
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -51,4 +51,11 @@ void ares__close_sockets(struct server_state *server)
       close(server->udp_socket);
       server->udp_socket = -1;
     }
+
+  /* Clear readable/writable flags, since we might be in the middle of
+   * an ares_process() run.
+   */
+  server->udp_readable = 0;
+  server->tcp_readable = 0;
+  server->tcp_writable = 0;
 }
