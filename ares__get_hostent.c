@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares__get_hostent.c,v 1.2 1999-10-23 19:28:13 danw Exp $";
+static const char rcsid[] = "$Id: ares__get_hostent.c,v 1.3 2000-02-17 18:39:58 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -145,7 +145,7 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
       /* Memory allocation failure; clean up. */
       if (hostent)
 	{
-	  free(hostent->h_name);
+	  free((char *) hostent->h_name);
 	  if (hostent->h_aliases)
 	    {
 	      for (alias = hostent->h_aliases; *alias; alias++)
