@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_process.c,v 1.1 1998-08-13 18:06:32 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_process.c,v 1.2 1998-08-17 21:50:06 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -151,7 +151,7 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
     }
 }
 
-/* If any TCP sockets select true for reading, read some data,
+/* If any TCP socket selects true for reading, read some data,
  * allocate a buffer if we finish reading the length word, and process
  * a packet if we finish reading one.
  */
@@ -376,9 +376,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
   if (query->using_tcp)
     {
       /* Make sure the TCP socket for this server is set up and queue
-       * a send request.  We won't actually send the request until the
-       * TCP socket selects true for writing (and until all previously
-       * queued data has been sent, of course).
+       * a send request.
        */
       if (server->tcp_socket == -1)
 	{
