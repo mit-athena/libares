@@ -39,10 +39,3 @@ out the library.  It doesn't get installed.
 
 libares is distributed at athena-dist.mit.edu:pub/ATHENA/ares.  Please
 send bug reports and comments to ghudson@mit.edu.
-
-Note that the Internet Software Consortium, the maintainers of BIND,
-have their own plans for those requiring non-blocking name resolution,
-involving an "event library," a more complicated model but one with
-certain advantages over the independent API used by libares.  If the
-ISC ever releases this new resolver, libares development may fall by
-the wayside.
