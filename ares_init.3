@@ -1,4 +1,4 @@
-.\" $Id: ares_init.3,v 1.1 1998-08-13 18:07:31 ghudson Exp $
+.\" $Id: ares_init.3,v 1.2 2003-11-05 19:36:22 ghudson Exp $
 .\"
 .\" Copyright 1998 by the Massachusetts Institute of Technology.
 .\"
@@ -50,13 +50,13 @@ parameter specifies which fields in the structure pointed to by
 .I options
 are set, as follows:
 .PP
-.TP 18
+.TP 19
 .B ARES_OPT_FLAGS
 .B int \fIflags\fP;
 .br
 Flags controlling the behavior of the resolver.  See below for a
 description of possible flag values.
-.TP 18
+.TP 19
 .B ARES_OPT_TIMEOUT
 .B int \fItimeout\fP;
 .br
@@ -64,13 +64,13 @@ The number of seconds each name server is given to respond to a query
 on the first try.  (After the first try, the timeout algorithm becomes
 more complicated, but scales linearly with the value of
 \fItimeout\fP.)  The default is five seconds.
-.TP 18
+.TP 19
 .B ARES_OPT_TRIES
 .B int \fItries\fP;
 .br
 The number of tries the resolver will try contacting each name server
 before giving up.  The default is four tries.
-.TP 18
+.TP 19
 .B ARES_OPT_NDOTS
 .B int \fIndots\fP;
 .br
@@ -78,14 +78,20 @@ The number of dots which must be present in a domain name for it to be
 queried for "as is" prior to querying for it with the default domain
 extensions appended.  The default value is 1 unless set otherwise by
 resolv.conf or the RES_OPTIONS environment variable.
-.TP 18
-.B ARES_OPT_PORT
-.B unsigned short \fIport\fP;
+.TP 19
+.B ARES_OPT_UDP_PORT
+.B unsigned short \fIudp_port\fP;
 .br
-The port to use for queries (both TCP and UDP), in network byte order.
-The default value is 53 (in network byte order), the standard name
-service port.
-.TP 18
+The port to use for queries UDP queries, in network byte order.  The
+default value is 53 (in network byte order), the standard name service
+port.
+.TP 19
+.B ARES_TCP_PORT
+.B unsigned short \fItcp_port\fP;
+.br
+The port to use for TCP queries, in network byte order.  The default
+value is 53 (in network byte order), the standard name service port.
+.TP 19
 .B ARES_OPT_SERVERS
 .B struct in_addr *\fIservers\fP;
 .br
@@ -93,7 +99,7 @@ service port.
 .br
 The list of servers to contact, instead of the servers specified in
 resolv.conf or the local named.
-.TP 18
+.TP 19
 .B ARES_OPT_DOMAINS
 .B char **\fIdomains\fP;
 .br
@@ -101,7 +107,7 @@ resolv.conf or the local named.
 .br
 The domains to search, instead of the domains specified in resolv.conf
 or the domain derived from the kernel hostname variable.
-.TP 18
+.TP 19
 .B ARES_OPT_LOOKUPS
 .B char *\fIlookups\fP;
 .br
