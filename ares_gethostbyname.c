@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.4 1998-09-03 02:40:57 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_gethostbyname.c,v 1.5 1998-09-17 23:18:41 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -152,7 +152,7 @@ static int fake_hostent(const char *name, ares_host_callback callback,
   struct hostent hostent;
   const char *p;
   char *aliases[1] = { NULL };
-  char *addrs[2] = { (char *) &addr, NULL };
+  char *addrs[2];
 
   /* It only looks like an IP address if it's all numbers and dots. */
   for (p = name; *p; p++)
@@ -184,6 +184,8 @@ static int fake_hostent(const char *name, ares_host_callback callback,
     }
 
   /* Fill in the rest of the host structure and terminate the query. */
+  addrs[0] = (char *) &addr;
+  addrs[1] = NULL;
   hostent.h_aliases = aliases;
   hostent.h_addrtype = AF_INET;
   hostent.h_length = sizeof(struct in_addr);
