@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_process.c,v 1.6 2000-09-21 19:15:53 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_process.c,v 1.7 2001-03-17 16:43:36 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -392,6 +392,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
 	    {
 	      query->skip_server[query->server] = 1;
 	      next_server(channel, query, now);
+	      return;
 	    }
 	}
       sendreq = malloc(sizeof(struct send_request));
@@ -415,12 +416,14 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
 	    {
 	      query->skip_server[query->server] = 1;
 	      next_server(channel, query, now);
+	      return;
 	    }
 	}
       if (send(server->udp_socket, query->qbuf, query->qlen, 0) == -1)
 	{
 	  query->skip_server[query->server] = 1;
 	  next_server(channel, query, now);
+	  return;
 	}
       query->timeout = now
 	  + ((query->try == 0) ? channel->timeout
