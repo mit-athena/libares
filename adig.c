@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: adig.c,v 1.7 2000-04-03 22:37:44 ghudson Exp $";
+static const char rcsid[] = "$Id: adig.c,v 1.8 2000-09-21 19:15:46 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -118,13 +118,13 @@ static const unsigned char *display_question(const unsigned char *aptr,
 static const unsigned char *display_rr(const unsigned char *aptr,
 				       const unsigned char *abuf, int alen);
 static const char *type_name(int type);
-static const char *class_name(int class);
+static const char *class_name(int dnsclass);
 static void usage(void);
 
 int main(int argc, char **argv)
 {
   ares_channel channel;
-  int c, i, optmask = ARES_OPT_FLAGS, class = C_IN, type = T_A;
+  int c, i, optmask = ARES_OPT_FLAGS, dnsclass = C_IN, type = T_A;
   int status, nfds, count;
   struct ares_options options;
   struct hostent *hostent;
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 	    }
 	  if (i == nclasses)
 	    usage();
-	  class = classes[i].value;
+	  dnsclass = classes[i].value;
 	  break;
 
 	case 't':
@@ -233,11 +233,11 @@ int main(int argc, char **argv)
    * distinguish responses for the user when printing them out.
    */
   if (argc == 1)
-    ares_query(channel, *argv, class, type, callback, (char *) NULL);
+    ares_query(channel, *argv, dnsclass, type, callback, (char *) NULL);
   else
     {
       for (; *argv; argv++)
-	ares_query(channel, *argv, class, type, callback, *argv);
+	ares_query(channel, *argv, dnsclass, type, callback, *argv);
     }
 
   /* Wait for all queries to complete. */
@@ -356,7 +356,7 @@ static const unsigned char *display_question(const unsigned char *aptr,
 					     int alen)
 {
   char *name;
-  int type, class, status, len;
+  int type, dnsclass, status, len;
 
   /* Parse the question name. */
   status = ares_expand_name(aptr, abuf, alen, &name, &len);
@@ -375,15 +375,15 @@ static const unsigned char *display_question(const unsigned char *aptr,
 
   /* Parse the question type and class. */
   type = DNS_QUESTION_TYPE(aptr);
-  class = DNS_QUESTION_CLASS(aptr);
+  dnsclass = DNS_QUESTION_CLASS(aptr);
   aptr += QFIXEDSZ;
 
   /* Display the question, in a format sort of similar to how we will
    * display RRs.
    */
   printf("\t%-15s.\t", name);
-  if (class != C_IN)
-    printf("\t%s", class_name(class));
+  if (dnsclass != C_IN)
+    printf("\t%s", class_name(dnsclass));
   printf("\t%s\n", type_name(type));
   free(name);
   return aptr;
@@ -394,7 +394,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
 {
   const unsigned char *p;
   char *name;
-  int type, class, ttl, dlen, status, len;
+  int type, dnsclass, ttl, dlen, status, len;
   struct in_addr addr;
 
   /* Parse the RR name. */
@@ -415,7 +415,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
   /* Parse the fixed part of the RR, and advance to the RR data
    * field. */
   type = DNS_RR_TYPE(aptr);
-  class = DNS_RR_CLASS(aptr);
+  dnsclass = DNS_RR_CLASS(aptr);
   ttl = DNS_RR_TTL(aptr);
   dlen = DNS_RR_LEN(aptr);
   aptr += RRFIXEDSZ;
@@ -427,8 +427,8 @@ static const unsigned char *display_rr(const unsigned char *aptr,
 
   /* Display the RR name, class, and type. */
   printf("\t%-15s.\t%d", name, ttl);
-  if (class != C_IN)
-    printf("\t%s", class_name(class));
+  if (dnsclass != C_IN)
+    printf("\t%s", class_name(dnsclass));
   printf("\t%s", type_name(type));
   free(name);
 
@@ -565,13 +565,13 @@ static const char *type_name(int type)
   return "(unknown)";
 }
 
-static const char *class_name(int class)
+static const char *class_name(int dnsclass)
 {
   int i;
 
   for (i = 0; i < nclasses; i++)
     {
-      if (classes[i].value == class)
+      if (classes[i].value == dnsclass)
 	return classes[i].name;
     }
   return "(unknown)";

@@ -1,4 +1,4 @@
-.\" $Id: ares_mkquery.3,v 1.4 2000-05-07 02:50:45 ghudson Exp $
+.\" $Id: ares_mkquery.3,v 1.5 2000-09-21 19:15:50 ghudson Exp $
 .\"
 .\" Copyright 1998, 2000 by the Massachusetts Institute of Technology.
 .\"
@@ -22,7 +22,7 @@ ares_mkquery \- Compose a single-question DNS query buffer
 .B #include <ares.h>
 .PP
 .B
-int ares_mkquery(const char *\fIname\fP, int \fIclass\fP, int \fItype\fP,
+int ares_mkquery(const char *\fIname\fP, int \fIdnsclass\fP, int \fItype\fP,
 .B
 	unsigned short \fIid\fP, int \fIrd\fP, char **\fIbuf\fP,
 	int *\fIbuflen\fP)
@@ -36,7 +36,7 @@ The parameter
 gives the query name as a NUL-terminated C string of period-separated
 labels optionally ending with a period; periods and backslashes within
 a label must be escaped with a backlash.  The parameters
-.I class
+.I dnsclass
 and
 .I type
 give the class and type of the query using the values defined in

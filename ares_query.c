@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_query.c,v 1.4 2000-01-05 16:29:44 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_query.c,v 1.5 2000-09-21 19:15:58 ghudson Exp $";
 
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -30,7 +30,7 @@ struct qquery {
 
 static void qcallback(void *arg, int status, unsigned char *abuf, int alen);
 
-void ares_query(ares_channel channel, const char *name, int class,
+void ares_query(ares_channel channel, const char *name, int dnsclass,
 		int type, ares_callback callback, void *arg)
 {
   struct qquery *qquery;
@@ -39,7 +39,8 @@ void ares_query(ares_channel channel, const char *name, int class,
 
   /* Compose the query. */
   rd = !(channel->flags & ARES_FLAG_NORECURSE);
-  status = ares_mkquery(name, class, type, channel->next_id, rd, &qbuf, &qlen);
+  status = ares_mkquery(name, dnsclass, type, channel->next_id, rd, &qbuf,
+			&qlen);
   channel->next_id++;
   if (status != ARES_SUCCESS)
     {

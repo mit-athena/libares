@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_process.c,v 1.5 2000-02-17 18:27:27 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_process.c,v 1.6 2000-09-21 19:15:53 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -501,7 +501,7 @@ static int same_questions(const unsigned char *qbuf, int qlen,
     char *name;
     int namelen;
     int type;
-    int class;
+    int dnsclass;
   } q, a;
   int i, j;
 
@@ -529,7 +529,7 @@ static int same_questions(const unsigned char *qbuf, int qlen,
 	  return 0;
 	}
       q.type = DNS_QUESTION_TYPE(q.p);
-      q.class = DNS_QUESTION_CLASS(q.p);
+      q.dnsclass = DNS_QUESTION_CLASS(q.p);
       q.p += QFIXEDSZ;
 
       /* Search for this question in the answer. */
@@ -551,12 +551,12 @@ static int same_questions(const unsigned char *qbuf, int qlen,
 	      return 0;
 	    }
 	  a.type = DNS_QUESTION_TYPE(a.p);
-	  a.class = DNS_QUESTION_CLASS(a.p);
+	  a.dnsclass = DNS_QUESTION_CLASS(a.p);
 	  a.p += QFIXEDSZ;
 
 	  /* Compare the decoded questions. */
 	  if (strcasecmp(q.name, a.name) == 0 && q.type == a.type
-	      && q.class == a.class)
+	      && q.dnsclass == a.dnsclass)
 	    {
 	      free(a.name);
 	      break;

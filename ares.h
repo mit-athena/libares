@@ -1,4 +1,4 @@
-/* $Id: ares.h,v 1.2 2000-01-05 16:29:43 ghudson Exp $ */
+/* $Id: ares.h,v 1.3 2000-09-21 19:15:48 ghudson Exp $ */
 
 /* Copyright 1998 by the Massachusetts Institute of Technology.
  *
@@ -94,9 +94,9 @@ void ares_destroy(ares_channel channel);
 
 void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
 	       ares_callback callback, void *arg);
-void ares_query(ares_channel channel, const char *name, int class,
+void ares_query(ares_channel channel, const char *name, int dnsclass,
 		int type, ares_callback callback, void *arg);
-void ares_search(ares_channel channel, const char *name, int class,
+void ares_search(ares_channel channel, const char *name, int dnsclass,
 		 int type, ares_callback callback, void *arg);
 void ares_gethostbyname(ares_channel channel, const char *name, int family,
 			ares_host_callback callback, void *arg);
@@ -108,7 +108,7 @@ struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv,
 			     struct timeval *tv);
 void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds);
 
-int ares_mkquery(const char *name, int class, int type, unsigned short id,
+int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
 		 int rd, unsigned char **buf, int *buflen);
 int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
 		     int alen, char **s, int *enclen);

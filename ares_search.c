@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_search.c,v 1.2 1999-10-23 19:28:14 danw Exp $";
+static const char rcsid[] = "$Id: ares_search.c,v 1.3 2000-09-21 19:16:02 ghudson Exp $";
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +26,7 @@ struct search_query {
   /* Arguments passed to ares_search */
   ares_channel channel;
   char *name;			/* copied into an allocated buffer */
-  int class;
+  int dnsclass;
   int type;
   ares_callback callback;
   void *arg;
@@ -43,7 +43,7 @@ static void end_squery(struct search_query *squery, int status,
 static int cat_domain(const char *name, const char *domain, char **s);
 static int single_domain(ares_channel channel, const char *name, char **s);
 
-void ares_search(ares_channel channel, const char *name, int class,
+void ares_search(ares_channel channel, const char *name, int dnsclass,
 		 int type, ares_callback callback, void *arg)
 {
   struct search_query *squery;
@@ -62,7 +62,7 @@ void ares_search(ares_channel channel, const char *name, int class,
     }
   if (s)
     {
-      ares_query(channel, s, class, type, callback, arg);
+      ares_query(channel, s, dnsclass, type, callback, arg);
       free(s);
       return;
     }
@@ -84,7 +84,7 @@ void ares_search(ares_channel channel, const char *name, int class,
       callback(arg, ARES_ENOMEM, NULL, 0);
       return;
     }
-  squery->class = class;
+  squery->dnsclass = dnsclass;
   squery->type = type;
   squery->status_as_is = -1;
   squery->callback = callback;
@@ -107,7 +107,7 @@ void ares_search(ares_channel channel, const char *name, int class,
       /* Try the name as-is first. */
       squery->next_domain = 0;
       squery->trying_as_is = 1;
-      ares_query(channel, name, class, type, search_callback, squery);
+      ares_query(channel, name, dnsclass, type, search_callback, squery);
     }
   else
     {
@@ -117,7 +117,7 @@ void ares_search(ares_channel channel, const char *name, int class,
       status = cat_domain(name, channel->domains[0], &s);
       if (status == ARES_SUCCESS)
 	{
-	  ares_query(channel, s, class, type, search_callback, squery);
+	  ares_query(channel, s, dnsclass, type, search_callback, squery);
 	  free(s);
 	}
       else
@@ -152,7 +152,7 @@ static void search_callback(void *arg, int status, unsigned char *abuf,
 	    {
 	      squery->trying_as_is = 0;
 	      squery->next_domain++;
-	      ares_query(channel, s, squery->class, squery->type,
+	      ares_query(channel, s, squery->dnsclass, squery->type,
 			 search_callback, squery);
 	      free(s);
 	    }
@@ -161,7 +161,7 @@ static void search_callback(void *arg, int status, unsigned char *abuf,
 	{
 	  /* Try the name as-is at the end. */
 	  squery->trying_as_is = 1;
-	  ares_query(channel, squery->name, squery->class, squery->type,
+	  ares_query(channel, squery->name, squery->dnsclass, squery->type,
 		     search_callback, squery);
 	}
       else

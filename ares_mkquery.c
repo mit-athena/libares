@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_mkquery.c,v 1.2 1999-10-23 19:28:14 danw Exp $";
+static const char rcsid[] = "$Id: ares_mkquery.c,v 1.3 2000-09-21 19:15:51 ghudson Exp $";
 
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -71,7 +71,7 @@ static const char rcsid[] = "$Id: ares_mkquery.c,v 1.2 1999-10-23 19:28:14 danw 
  * be thought of as the root domain).
  */
 
-int ares_mkquery(const char *name, int class, int type, unsigned short id,
+int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
 		 int rd, unsigned char **buf, int *buflen)
 {
   int len;
@@ -149,7 +149,7 @@ int ares_mkquery(const char *name, int class, int type, unsigned short id,
 
   /* Finish off the question with the type and class. */
   DNS_QUESTION_SET_TYPE(q, type);
-  DNS_QUESTION_SET_CLASS(q, class);
+  DNS_QUESTION_SET_CLASS(q, dnsclass);
 
   return ARES_SUCCESS;
 }
