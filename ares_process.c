@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_process.c,v 1.9 2002-04-04 14:01:58 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_process.c,v 1.10 2002-10-08 23:28:37 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -344,7 +344,7 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
 
 static void handle_error(ares_channel channel, int whichserver, time_t now)
 {
-  struct query *query;
+  struct query *query, *next;
 
   /* Reset communications with this server. */
   ares__close_sockets(&channel->servers[whichserver]);
@@ -352,8 +352,9 @@ static void handle_error(ares_channel channel, int whichserver, time_t now)
   /* Tell all queries talking to this server to move on and not try
    * this server again.
    */
-  for (query = channel->queries; query; query = query->next)
+  for (query = channel->queries; query; query = next)
     {
+      next = query->next;
       if (query->server == whichserver)
 	{
 	  query->skip_server[whichserver] = 1;
