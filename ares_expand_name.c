@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_expand_name.c,v 1.1 1998-08-13 18:06:27 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_expand_name.c,v 1.1.2.1 1999-03-10 03:05:45 ghudson Exp $";
 
 #include <sys/types.h>
 #include <arpa/nameser.h>
@@ -120,7 +120,7 @@ static int name_length(const unsigned char *encoded, const unsigned char *abuf,
 	  if (encoded + 1 >= abuf + alen)
 	    return -1;
 	  offset = (*encoded & ~INDIR_MASK) << 8 | *(encoded + 1);
-	  if (offset > alen)
+	  if (offset >= alen)
 	    return -1;
 	  encoded = abuf + offset;
 
@@ -133,7 +133,7 @@ static int name_length(const unsigned char *encoded, const unsigned char *abuf,
       else
 	{
 	  offset = *encoded;
-	  if (encoded + offset >= abuf + alen)
+	  if (encoded + offset + 1 >= abuf + alen)
 	    return -1;
 	  encoded++;
 	  while (offset--)
