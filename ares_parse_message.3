@@ -1,4 +1,4 @@
-.\" $Id: ares_parse_message.3,v 1.1 2002-09-08 23:53:51 ghudson Exp $
+.\" $Id: ares_parse_message.3,v 1.2 2003-08-05 13:12:58 mwhitson Exp $
 .\"
 .\" Copyright 2002 by the Massachusetts Institute of Technology.
 .\"
@@ -100,13 +100,13 @@ The number of questions in this message.
 .B struct ares_dns_question *\fIquestions\fP;
 This message's queries.
 .TP 15
-.B struct ares_dns_section *\fIanswers\fP;
+.B struct ares_dns_section \fIanswers\fP;
 This message's answers.
 .TP 15
-.B struct ares_dns_section *\fIauthority\fP;
+.B struct ares_dns_section \fIauthority\fP;
 This message's authority records.
 .TP 15
-.B struct ares_dns_section *\fIadditional\fP;
+.B struct ares_dns_section \fIadditional\fP;
 This message's additional records.
 .PP
 The
