@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.4 2002-09-08 23:53:43 ghudson Exp $
+# $Id: Makefile.in,v 1.5 2005-04-06 19:36:17 ghudson Exp $
 
 SHELL=/bin/sh
 INSTALL=@INSTALL@
@@ -11,7 +11,9 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 mandir=@mandir@
+top_builddir=.
 
+LIBTOOL=@LIBTOOL@
 CC=@CC@
 CPPFLAGS=@CPPFLAGS@
 CFLAGS=@CFLAGS@ ${WARN_CFLAGS} ${ERROR_CFLAGS}
@@ -19,30 +21,35 @@ DEFS=@DEFS@
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
 ALL_CFLAGS=${CPPFLAGS} ${CFLAGS} ${DEFS}
-OBJS=	ares__close_sockets.o ares__get_hostent.o ares__read_line.o \
-	ares_destroy.o ares_expand_name.o ares_fds.o ares_free_dns_message.o \
-	ares_free_errmem.o ares_free_hostent.o ares_free_string.o \
-	ares_gethostbyaddr.o ares_gethostbyname.o ares_init.o ares_mkquery.o \
-	ares_parse_a_reply.o ares_parse_message.o ares_parse_ptr_reply.o \
-	ares_process.o ares_query.o ares_search.o ares_send.o ares_strerror.o \
-	ares_timeout.o
+OBJS=	ares__close_sockets.lo ares__get_hostent.lo ares__read_line.lo \
+	ares_destroy.lo ares_expand_name.lo ares_fds.lo \
+	ares_free_dns_message.lo ares_free_errmem.lo ares_free_hostent.lo \
+	ares_free_string.lo ares_gethostbyaddr.lo ares_gethostbyname.lo \
+	ares_init.lo ares_mkquery.lo ares_parse_a_reply.lo \
+	ares_parse_message.lo ares_parse_ptr_reply.lo ares_process.lo \
+	ares_query.lo ares_search.lo ares_send.lo ares_strerror.lo \
+	ares_timeout.lo
 
-all: libares.a adig ahost
+.SUFFIXES: .lo
 
-libares.a: ${OBJS}
-	ar cru $@ ${OBJS}
-	${RANLIB} $@
+all: libares.la adig ahost
 
-adig: adig.o libares.a
-	${CC} ${LDFLAGS} -o $@ adig.o libares.a ${LIBS}
+libares.la: ${OBJS}
+	${LIBTOOL} --mode=link ${CC} -rpath ${libdir} -version-info 0:0:0 \
+	  -o $@ ${OBJS} ${LIBS}
 
-ahost: ahost.o libares.a
-	${CC} ${LDFLAGS} -o $@ ahost.o libares.a ${LIBS}
+adig: adig.lo libares.la
+	${LIBTOOL} --mode=link ${CC} ${LDFLAGS} -o $@ adig.lo \
+	  libares.la
+
+ahost: ahost.lo libares.la
+	${LIBTOOL} --mode=link ${CC} ${LDFLAGS} -o $@ ahost.lo \
+	  libares.la
 
 ${OBJS}: ares.h ares_dns.h ares_private.h
 
-.c.o:
-	${CC} -c ${ALL_CFLAGS} $<
+.c.lo:
+	${LIBTOOL} --mode=compile ${CC} -c ${ALL_CFLAGS} $<
 
 check:
 
@@ -50,9 +57,8 @@ install:
 	${top_srcdir}/mkinstalldirs ${DESTDIR}${libdir}
 	${top_srcdir}/mkinstalldirs ${DESTDIR}${includedir}
 	${top_srcdir}/mkinstalldirs ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 644 libares.a ${DESTDIR}${libdir}
-	${RANLIB} ${DESTDIR}${libdir}/libares.a
-	chmod u-w ${DESTDIR}${libdir}/libares.a
+	${LIBTOOL} --mode=install ${INSTALL} -m 644 libares.la \
+	  ${DESTDIR}${libdir}
 	${INSTALL} -m 444 ${srcdir}/ares.h ${DESTDIR}${includedir}
 	${INSTALL} -m 444 ${srcdir}/ares_destroy.3 ${DESTDIR}${mandir}/man3
 	${INSTALL} -m 444 ${srcdir}/ares_expand_name.3 ${DESTDIR}${mandir}/man3
@@ -86,7 +92,8 @@ install:
 	${INSTALL} -m 444 ${srcdir}/ares_timeout.3 ${DESTDIR}${mandir}/man3
 
 clean:
-	rm -f ${OBJS} libares.a adig.o adig ahost.o ahost
+	${LIBTOOL} --mode=clean rm -f ${OBJS} libares.la adig.lo ahost.lo
+	${LIBTOOL} --mode=clean rm -f adig ahost
 
 distclean: clean
 	rm -f config.cache config.log config.status Makefile
