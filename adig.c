@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: adig.c,v 1.3 1998-09-04 21:09:53 ghudson Exp $";
+static const char rcsid[] = "$Id: adig.c,v 1.4 1998-09-17 23:19:12 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -271,7 +271,7 @@ static void callback(void *arg, int status, unsigned char *abuf, int alen)
   char *name = (char *) arg, *errmem;
   int id, qr, opcode, aa, tc, rd, ra, rcode, i;
   unsigned int qdcount, ancount, nscount, arcount;
-  const char *aptr;
+  const unsigned char *aptr;
 
   /* Display the query name if given. */
   if (name)
