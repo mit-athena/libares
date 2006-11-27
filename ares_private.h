@@ -1,4 +1,4 @@
-/* $Id: ares_private.h,v 1.5 2002-09-08 23:53:53 ghudson Exp $ */
+/* $Id: ares_private.h,v 1.6 2006-11-27 20:42:31 ghudson Exp $ */
 
 /* Copyright 1998, 2002 by the Massachusetts Institute of Technology.
  *
@@ -34,7 +34,7 @@
 
 struct send_request {
   /* Remaining data to send */
-  const char *data;
+  const unsigned char *data;
   int len;
 
   /* Next request in queue */
@@ -71,11 +71,11 @@ struct query {
   time_t timeout;
 
   /* Query buf with length at beginning, for TCP transmission */
-  char *tcpbuf;
+  unsigned char *tcpbuf;
   int tcplen;
 
   /* Arguments passed to ares_send() (qbuf points into tcpbuf) */
-  const char *qbuf;
+  const unsigned char *qbuf;
   int qlen;
   ares_callback callback;
   void *arg;

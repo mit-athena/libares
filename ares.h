@@ -1,4 +1,4 @@
-/* $Id: ares.h,v 1.4 2002-09-08 23:53:49 ghudson Exp $ */
+/* $Id: ares.h,v 1.5 2006-11-27 20:42:27 ghudson Exp $ */
 
 /* Copyright 1998, 2002 by the Massachusetts Institute of Technology.
  *
@@ -176,7 +176,7 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
 int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
 			 int addrlen, int family, struct hostent **host);
 
-void ares_free_string(char *str);
+void ares_free_string(void *str);
 void ares_free_dns_message(struct ares_dns_message *message);
 void ares_free_hostent(struct hostent *host);
 const char *ares_strerror(int code, char **memptr);

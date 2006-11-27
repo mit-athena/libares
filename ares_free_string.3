@@ -1,4 +1,4 @@
-.\" $Id: ares_free_string.3,v 1.1 2000-01-05 16:29:43 ghudson Exp $
+.\" $Id: ares_free_string.3,v 1.2 2006-11-27 20:42:30 ghudson Exp $
 .\"
 .\" Copyright 2000 by the Massachusetts Institute of Technology.
 .\"
@@ -21,7 +21,7 @@ ares_free_string \- Free strings allocated by ares functions
 .nf
 .B #include <ares.h>
 .PP
-.B void ares_free_string(char *\fIstr\fP)
+.B void ares_free_string(void *\fIstr\fP)
 .fi
 .SH DESCRIPTION
 The

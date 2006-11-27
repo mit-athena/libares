@@ -13,7 +13,7 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id: ares_parse_message.c,v 1.2 2002-09-10 16:03:28 ghudson Exp $";
+static const char rcsid[] = "$Id: ares_parse_message.c,v 1.3 2006-11-27 20:42:30 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -28,19 +28,19 @@ static const char rcsid[] = "$Id: ares_parse_message.c,v 1.2 2002-09-10 16:03:28
 #include "ares_dns.h"
 #include "ares_private.h"
 
-static const char *parse_questions(const unsigned char *aptr,
-				   const unsigned char *abuf,
-				   int alen, int count,
-				   struct ares_dns_question **questions);
-static const char *parse_question(const unsigned char *aptr,
-				  const unsigned char *abuf, int alen,
-				  struct ares_dns_question *question);
-static const char *parse_section(const unsigned char *aptr,
-				 const unsigned char *abuf, int alen,
-				 struct ares_dns_section *section);
-static const char *parse_rr(const unsigned char *aptr,
-			    const unsigned char *abuf, int alen,
-			    struct ares_dns_rr *rr);
+static const unsigned char *parse_questions(const unsigned char *aptr,
+					    const unsigned char *abuf,
+					    int alen, int count,
+					    struct ares_dns_question **qs);
+static const unsigned char *parse_question(const unsigned char *aptr,
+					   const unsigned char *abuf, int alen,
+					   struct ares_dns_question *question);
+static const unsigned char *parse_section(const unsigned char *aptr,
+					  const unsigned char *abuf, int alen,
+					  struct ares_dns_section *section);
+static const unsigned char *parse_rr(const unsigned char *aptr,
+				     const unsigned char *abuf, int alen,
+				     struct ares_dns_rr *rr);
 static int parse_rr_data(const unsigned char *aptr, const unsigned char *abuf,
 			 int alen, struct ares_dns_rr *rr);
 static int uncompress_rr_data(const unsigned char *aptr,
@@ -124,10 +124,10 @@ int ares_parse_message(const unsigned char *abuf, int alen,
 /* Parse the section of questions starting at aptr; return pointer to
  * the first byte after the section.  Return NULL on error.
  */
-static const char *parse_questions(const unsigned char *aptr,
-				   const unsigned char *abuf,
-				   int alen, int count,
-				   struct ares_dns_question **questions)
+static const unsigned char *parse_questions(const unsigned char *aptr,
+					    const unsigned char *abuf,
+					    int alen, int count,
+					    struct ares_dns_question **qs)
 {
   struct ares_dns_question *quests;
   int i, j;
@@ -150,16 +150,16 @@ static const char *parse_questions(const unsigned char *aptr,
 	}
     }
 
-  *questions = quests;
+  *qs = quests;
   return aptr;
 }
 
 /* Parse a question starting at aptr; return pointer to the first byte
  * after the RR.  Return NULL on error.
  */
-static const char *parse_question(const unsigned char *aptr,
-				  const unsigned char *abuf, int alen,
-				  struct ares_dns_question *question)
+static const unsigned char *parse_question(const unsigned char *aptr,
+					   const unsigned char *abuf, int alen,
+					   struct ares_dns_question *question)
 {
   int len, status;
 
@@ -181,9 +181,9 @@ static const char *parse_question(const unsigned char *aptr,
  * the first byte after the section.  section->count must already be set.
  * Return NULL on error.
  */
-static const char *parse_section(const unsigned char *aptr,
-				 const unsigned char *abuf, int alen,
-				 struct ares_dns_section *section)
+static const unsigned char *parse_section(const unsigned char *aptr,
+					  const unsigned char *abuf, int alen,
+					  struct ares_dns_section *section)
 {
   struct ares_dns_rr *records;
   int i, j;
@@ -213,9 +213,9 @@ static const char *parse_section(const unsigned char *aptr,
 /* Parse a resource record starting at aptr; return pointer to the first
  * byte after the RR.  Return NULL on error.
  */
-static const char *parse_rr(const unsigned char *aptr,
-			    const unsigned char *abuf, int alen,
-			    struct ares_dns_rr *rr)
+static const unsigned char *parse_rr(const unsigned char *aptr,
+				     const unsigned char *abuf, int alen,
+				     struct ares_dns_rr *rr)
 {
   int len, status;
 
