@@ -138,6 +138,7 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
 		hostent->h_addr_list[i] = (char *) &addrs[i];
 	      hostent->h_addr_list[naddrs] = NULL;
 	      *host = hostent;
+	      ares_free_dns_message(message);
 	      return ARES_SUCCESS;
 	    }
 	  free(hostent);

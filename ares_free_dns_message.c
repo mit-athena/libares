@@ -25,6 +25,7 @@ void ares_free_dns_message(struct ares_dns_message *message)
   ares__free_section(&message->answers);
   ares__free_section(&message->authority);
   ares__free_section(&message->additional);
+  free(message);
 }
 
 void ares__free_questions(struct ares_dns_question *questions, int count)
